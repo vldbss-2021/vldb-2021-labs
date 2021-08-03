@@ -4,10 +4,12 @@ In this project, you will build a standalone key/value storage [gRPC](https://gr
 
 The service supports four basic operations: Put/Delete/Get/Scan. It maintains a simple database of key/value pairs. Keys and values are strings. `Put` replaces the value for a particular key for the specified CF in the database, `Delete` deletes the key's value for the specified CF, `Get` fetches the current value for a key for the specified CF, and `Scan` fetches the current value for a series of keys for the specified CF.
 
+<!--
 The project can be broken down into 2 steps, including:
 
 1. Implement a standalone storage engine.
 2. Implement raw key/value service handlers.
+-->
 
 ### The Code
 
@@ -45,3 +47,4 @@ And you don’t need to consider the `kvrpcpb.Context` now, it’s used in the f
 #### Implement service handlers
 
 The final step of this project is to use the implemented storage engine to build raw key/value service handlers including RawGet/ RawScan/ RawPut/ RawDelete. The handler is already defined for you, you only need to fill up the implementation in `kv/server/server.go`. Once done, remember to run `make project1` to pass the test suite.
+

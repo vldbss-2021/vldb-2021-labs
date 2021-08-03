@@ -178,7 +178,9 @@ After this the whole process of a read or write would be like this:
 - `RaftStorage` receive the response from callback and returns to RPC handler
 - RPC handler does some actions and returns the RPC response to clients.
 
+<!--
 You should run `make project2b` to pass all the tests. The whole test is running a mock cluster including multiple TinyKV instances with a mock network. It performs some read and write operations and checks whether the return values are as expected.
+-->
 
 To be noted, error handling is an important part of passing the test. You may have already noticed that there are some errors defined in `proto/proto/errorpb.proto` and the error is a field of the gRPC response. Also, the corresponding errors which implements `error` interface are defined in `kv/raftstore/util/error.go`, so you can use them as a return value of functions.
 
@@ -226,4 +228,6 @@ Then due to the log compaction, Raft module maybe needs to send a snapshot. `Pee
 Then the snapshot will reflect in the next Raft ready, so the task you should do is to modify the raft ready process to handle the case of snapshot. When you are sure to apply the snapshot, you can update the peer storage’s memory state like `RaftLocalState`, `RaftApplyState` and `RegionLocalState`. Also don’t forget to persist these states to kvdb and raftdb and remove stale state from kvdb and raftdb. Besides, you also need to update
 `PeerStorage.snapState` to `snap.SnapState_Applying` and send `runner.RegionTaskApply` task to region worker through `PeerStorage.regionSched` and wait until region worker finish.
 
+<!--
 You should run `make project2c` to pass all the tests.
+-->

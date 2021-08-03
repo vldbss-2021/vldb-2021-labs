@@ -4,10 +4,10 @@ This is a series of projects on a key-value storage system built with the Raft c
 
 The whole project is a skeleton code for a kv server and a scheduler server at initial, and you need to finish the core logic step by step:
 
-- Project1: build a standalone key-value server
-- Project2: build a high available key-value server with Raft
-- Project3: support multi Raft group and balance scheduling on top of Project2
-- Project4: support distributed transaction on top of Project3
+- Lab 1
+  - Build a standalone key-value server
+  - Build a high available key-value server with Raft
+- Lab 2: Support distributed transaction on top of Project3
 
 **Important note: This course is still in developing, and the document is incomplete.** Any feedback and contribution is greatly appreciated. Please see help wanted issues if you want to join in the development.
 
@@ -26,13 +26,9 @@ Also, you’d better read the overview design of TiKV and PD to get a general im
 
 ### Getting started
 
-First, please clone the repository with git to get the source code of the project.
+- Installed [go](https://golang.org/doc/install) >= 1.13 toolchains. 
+- Installed `make`.
 
-``` bash
-git clone https://github.com/pingcap-incubator/tinykv.git
-```
-
-Then make sure you have installed [go](https://golang.org/doc/install) >= 1.13 toolchains. You should also have installed `make`.
 Now you can run `make` to check that everything is working as expected. You should see it runs successfully.
 
 ### Overview of the code
@@ -51,12 +47,12 @@ The whole project is organized into the following directories:
 
 ### Course material
 
-Please follow the course material to learn the background knowledge and finish code step by step.
+There are some materials which may help you understand the structure and modules of the system. **There are some goals in the materials, it's not your task to implement them.**
 
-- [Project1 - StandaloneKV](doc/project1-StandaloneKV.md)
-- [Project2 - RaftKV](doc/project2-RaftKV.md)
-- [Project3 - MultiRaftKV](doc/project3-MultiRaftKV.md)
-- [Project4 - Transaction](doc/project4-Transaction.md)
+- [StandaloneKV](doc/project1-StandaloneKV.md)
+- [RaftKV](doc/project2-RaftKV.md)
+- [MultiRaftKV](doc/project3-MultiRaftKV.md)
+- [Transaction](doc/project4-Transaction.md)
 
 ## Deploy a cluster
 
@@ -84,12 +80,23 @@ mkdir -p data
 ./tinyscheduler-server
 ```
 
-```
+```sh
 ./tinykv-server -path=data
+# A different path and listening address should be specified for second node
+./tinykv-server -path=data2 -d="127.0.0.1:20161"
 ```
 
 ```
 ./tinysql-server --store=tikv --path="127.0.0.1:2379"
+```
+
+Besides, we offer a local cluster manager tool.
+
+```sh
+make # build tinykv-server and tinyscheduler-server
+make deploy-cluster # build deploy tool
+./bin/cluster deploy
+./bin/cluster start
 ```
 
 ### Play
