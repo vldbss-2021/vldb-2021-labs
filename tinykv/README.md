@@ -28,7 +28,7 @@ Also, you’d better read the overview design of TiKV and PD to get a general im
 First, please clone the repository with git to get the source code of the project.
 
 ``` bash
-git clone https://github.com/pingcap-incubator/tinykv.git
+git clone https://github.com/vldbss-2021/vldb-2021-labs-beta.git
 ```
 
 Then make sure you have installed [go](https://golang.org/doc/install) >= 1.13 toolchains. You should also have installed `make`.
@@ -38,7 +38,7 @@ Now you can run `make` to check that everything is working as expected. You shou
 
 ![overview](doc_ss/imgs/overview.png)
 
-Same as the architecture of TiDB + TiKV + PD that separates the storage and computation, TinyKV only focuses on the storage layer of a distributed database system. If you are also interested in SQL layer, see [TinySQL](https://github.com/pingcap-incubator/tinysql). Besides that, there is a component called TinyScheduler as a center control of the whole TinyKV cluster, which collects information from the heartbeats of TinyKV. After that, the TinyScheduler can generate some scheduling tasks and distribute them to the TinyKV instances. All of them are communicated by RPC.
+Same as the architecture of TiDB + TiKV + PD that separates the storage and computation, TinyKV only focuses on the storage layer of a distributed database system. If you are also interested in SQL layer, see [TinySQL](https://github.com/vldbss-2021/vldb-2021-labs-beta/tree/master/tinysql). Besides that, there is a component called TinyScheduler as a center control of the whole TinyKV cluster, which collects information from the heartbeats of TinyKV. After that, the TinyScheduler can generate some scheduling tasks and distribute them to the TinyKV instances. All of them are communicated by RPC.
 
 The whole project is organized into the following directories:
 
