@@ -4,16 +4,15 @@ This is a series of projects on a key-value storage system built with the Raft c
 
 The whole project is a skeleton code for a kv server and a scheduler server at initial, and you need to finish the core logic step by step:
 
-- Project1: build a standalone key-value server
-- Project2: build a high available key-value server with Raft
-- Project3: support multi Raft group and balance scheduling on top of Project2
-- Project4: support distributed transaction on top of Project3
+- lab1: build a standalone key-value server and use the raft library to build a high available log engine in TinyKV
+- lab2: Implement the transaction engine in TinyKV
+- lab3: Implement the transaction engine in TinySQL
+- lab4: Implement the write path for sql engine in TinySQL
 
-**Important note: This course is still in developing, and the document is incomplete.** Any feedback and contribution is greatly appreciated. Please see help wanted issues if you want to join in the development.
 
 ## Course
 
-Here is a [reading list](doc/reading_list.md) for the knowledge of distributed storage system. Though not all of them are highly related with this course, it can help you construct the knowledge system in this field.
+Here is a [reading list](doc_ss/reading_list.md) for the knowledge of distributed storage system. Though not all of them are highly related with this course, it can help you construct the knowledge system in this field.
 
 Also, you’d better read the overview design of TiKV and PD to get a general impression on what you will build:
 
@@ -37,7 +36,7 @@ Now you can run `make` to check that everything is working as expected. You shou
 
 ### Overview of the code
 
-![overview](doc/imgs/overview.png)
+![overview](doc_ss/imgs/overview.png)
 
 Same as the architecture of TiDB + TiKV + PD that separates the storage and computation, TinyKV only focuses on the storage layer of a distributed database system. If you are also interested in SQL layer, see [TinySQL](https://github.com/pingcap-incubator/tinysql). Besides that, there is a component called TinyScheduler as a center control of the whole TinyKV cluster, which collects information from the heartbeats of TinyKV. After that, the TinyScheduler can generate some scheduling tasks and distribute them to the TinyKV instances. All of them are communicated by RPC.
 
@@ -53,10 +52,8 @@ The whole project is organized into the following directories:
 
 Please follow the course material to learn the background knowledge and finish code step by step.
 
-- [Project1 - StandaloneKV](doc/project1-StandaloneKV.md)
-- [Project2 - RaftKV](doc/project2-RaftKV.md)
-- [Project3 - MultiRaftKV](doc/project3-MultiRaftKV.md)
-- [Project4 - Transaction](doc/project4-Transaction.md)
+- [lab1 - log and storage engine](doc_ss/lab1.md)
+- [lab2 - transaction engine the participant](doc_ss/lab2.md)
 
 ## Deploy a cluster
 
@@ -70,7 +67,7 @@ make
 
 It builds the binary of `tinykv-server` and `tinyscheduler-server` to `bin` dir.
 
-### Run
+### Deploy By Hand
 
 Put the binary of `tinyscheduler-server`, `tinykv-server` and `tinysql-server` into a single dir.
 
@@ -90,6 +87,29 @@ mkdir -p data
 
 ```
 ./tinysql-server --store=tikv --path="127.0.0.1:2379"
+```
+
+### Deploy Use Cluster Binary
+
+Deploy the cluster in the local environment
+```
+make deploy-cluster
+compile the cluster binary
+
+./bin/cluster deploy
+deploy the cluster, by default the number of scheduler server is 1 and the number of kv server is 3.
+
+./bin/cluster start
+start the deployed
+
+./bin/cluster stop
+stop the cluster
+
+./bin/cluster upgrade
+update the binary, please stop the cluster then do the upgrade
+
+./bin/cluster destroy
+unsafe destroy the whole cluster
 ```
 
 ### Play
