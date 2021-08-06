@@ -22,3 +22,13 @@ There are 4 labs in this course.
     - [Lab4 B](./tinysql/doc_ss/lab4b-README-zh_CN.md), implement update executor.
     - [Lab4 C](./tinysql/doc_ss/lab4c-README-zh_CN.md), implement select and projection executor.
 
+### Getting started
+
+First, please clone the repository with git to get the source code of the project.
+
+``` bash
+git clone https://github.com/vldbss-2021/vldb-2021-labs-beta.git
+```
+
+Then make sure you have installed [go](https://golang.org/doc/install) >= 1.13 toolchains. You should also have installed `make`.
+Now you can run `make` to check that everything is working as expected. You should see it runs successfully.
