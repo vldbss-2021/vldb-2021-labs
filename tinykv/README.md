@@ -23,17 +23,6 @@ Also, you’d better read the overview design of TiKV and PD to get a general im
   - <https://pingcap.com/blog-cn/tidb-internal-3/> (Chinese Version)
   - <https://pingcap.com/blog/2017-07-20-tidbinternal3/> (English Version)
 
-### Getting started
-
-First, please clone the repository with git to get the source code of the project.
-
-``` bash
-git clone https://github.com/vldbss-2021/vldb-2021-labs-beta.git
-```
-
-Then make sure you have installed [go](https://golang.org/doc/install) >= 1.13 toolchains. You should also have installed `make`.
-Now you can run `make` to check that everything is working as expected. You should see it runs successfully.
-
 ### Overview of the code
 
 ![overview](doc_ss/imgs/overview.png)
