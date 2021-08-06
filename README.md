@@ -32,3 +32,79 @@ git clone https://github.com/vldbss-2021/vldb-2021-labs-beta.git
 
 Then make sure you have installed [go](https://golang.org/doc/install) >= 1.13 toolchains. You should also have installed `make`.
 Now you can run `make` to check that everything is working as expected. You should see it runs successfully.
+
+
+## Deploy a cluster
+
+Rather than a course, you can try TinyKV by deploying a real cluster, and interact with it through TinySQL.
+
+### Build
+
+```
+cd tinykv
+make kv
+```
+
+It builds the binary of `tinykv-server` and `tinyscheduler-server` to `bin` dir.
+
+```
+cd tinysql
+make server
+```
+It buillds the binary of `tinysql-server` to `bin` dir.
+
+
+### Deploy By Hand
+
+Put the binary of `tinyscheduler-server`, `tinykv-server` and `tinysql-server` into a single dir.
+Under the binary dir, run the following commands:
+
+```
+mkdir -p data
+```
+
+```
+./tinyscheduler-server
+```
+
+```
+./tinykv-server -path=data
+```
+
+```
+./tinysql-server --store=tikv --path="127.0.0.1:2379"
+```
+
+### Deploy Use Cluster Binary
+
+Deploy the cluster in the local environment
+```
+make deploy-cluster
+compile the cluster binary
+
+./bin/cluster deploy
+deploy the cluster, by default the number of scheduler server is 1 and the number of kv server is 3.
+
+./bin/cluster start
+start the deployed
+
+./bin/cluster stop
+stop the cluster
+
+./bin/cluster upgrade
+update the binary, please stop the cluster then do the upgrade
+
+./bin/cluster destroy
+unsafe destroy the whole cluster
+```
+
+Note this does not deploy a `tinysql` server, to deploy a `tinysql` server, use
+```
+./tinysql-server --store=tikv --path="127.0.0.1:2379"
+```
+
+### Play
+
+```
+mysql -u root -h 127.0.0.1 -P 4000
+```
