@@ -75,27 +75,29 @@ mkdir -p data
 ./tinysql-server --store=tikv --path="127.0.0.1:2379"
 ```
 
-### Deploy Use Cluster Binary
+### Deploy Use Cluster Command
 
 Deploy the cluster in the local environment
 ```
+# compile the cluster binary
+cd tinykv
 make deploy-cluster
-compile the cluster binary
 
+# deploy the cluster, by default the number of scheduler server is 1 and the number of kv server is 3.
 ./bin/cluster deploy
-deploy the cluster, by default the number of scheduler server is 1 and the number of kv server is 3.
 
+# start the deployed cluster
 ./bin/cluster start
-start the deployed
 
+# stop the deployed cluster
 ./bin/cluster stop
-stop the cluster
 
+# update the binary, please stop the cluster then do the upgrade
 ./bin/cluster upgrade
-update the binary, please stop the cluster then do the upgrade
 
+# unsafe destroy the whole cluster
 ./bin/cluster destroy
-unsafe destroy the whole cluster
+
 ```
 
 Note this does not deploy a `tinysql` server, to deploy a `tinysql` server, use
