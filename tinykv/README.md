@@ -38,7 +38,7 @@ The whole project is organized into the following directories:
 
 ### Course material
 
-There are some materials which may help you understand the structure and modules of the system. **There are some goals in the materials, it's not your task to implement them.**
+Please follow the course material to learn the background knowledge and finish code step by step.
 
 - [lab1 - log and storage engine](doc_ss/lab1.md)
 - [lab2 - transaction engine the participant](doc_ss/lab2.md)
