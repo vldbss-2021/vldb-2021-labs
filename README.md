@@ -14,13 +14,17 @@ There are several modules in a distributed database.
 
 There are 4 labs in this course.
 
-- [Lab1](./tinykv/doc_ss/lab1.md), implement the storage and log layer in TinyKV.
-- [Lab2](./tinykv/doc_ss/lab2.md), implement the transaction layer in TinyKV.
-- [Lab3](./tinysql/doc_ss/lab3-README-zh_CN.md), implement the Percolator protocol.
-- Lab4, implement the SQL execution layer.
-    - [Lab4 A](./tinysql/doc_ss/lab4a-README-zh_CN.md), implement SQL protocol.
-    - [Lab4 B](./tinysql/doc_ss/lab4b-README-zh_CN.md), implement update executor.
-    - [Lab4 C](./tinysql/doc_ss/lab4c-README-zh_CN.md), implement select and projection executor.
+- [Lab 1](./tinykv/doc_ss/lab1.md), implement the storage and log layer in TinyKV.
+- [Lab 2](./tinykv/doc_ss/lab2.md), implement the transaction layer in TinyKV.
+- [Lab 3](./tinysql/doc_ss/lab3-README-zh_CN.md), implement the Percolator protocol.
+- Lab 4, implement the SQL execution layer.
+    - [Lab 4-A](./tinysql/doc_ss/lab4a-README-zh_CN.md), implement SQL protocol.
+    - [Lab 4-B](./tinysql/doc_ss/lab4b-README-zh_CN.md), implement update executor.
+    - [Lab 4-C](./tinysql/doc_ss/lab4c-README-zh_CN.md), implement select and projection executor.
+
+The code is separated into 2 parts, TinyKV and TinyScheduler is in [tinykv](./tinykv), and TinySQL is in [tinysql](./tinysql). 
+
+You need to follow the order in the [labs](#labs) chapter. You may learn more from the README files in [TinyKV](./tinykv/README.md) and [TinySQL](./tinysql/README.md).
 
 ## Autograding
 
@@ -39,7 +43,7 @@ git clone https://github.com/vldbss-2021/vldb-2021-labs-{{username}}.git
 ```
 
 Then make sure you have installed [go](https://golang.org/doc/install) >= 1.13 toolchains. You should also have installed `make`.
-Now you can run `make` to check that everything is working as expected. You should see it runs successfully.
+Now you can run `make` under `tinykv` or `tinysql` dir to check that everything is working as expected. You should see it runs successfully.
 
 ## Deploy a cluster
 

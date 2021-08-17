@@ -4,11 +4,10 @@ This is a series of projects on a key-value storage system built with the Raft c
 
 The whole project is a skeleton code for a kv server and a scheduler server at initial, and you need to finish the core logic step by step:
 
-- lab1: build a standalone key-value server and use the raft library to build a high available log engine in TinyKV
-- lab2: Implement the transaction engine in TinyKV
-- lab3: Implement the transaction engine in TinySQL
-- lab4: Implement the write path for sql engine in TinySQL
-
+- Lab 1
+  - Build a standalone key-value server
+  - Build a high available key-value server with Raft
+- Lab 2: Support distributed transaction on top of Project3
 
 ## Course
 
