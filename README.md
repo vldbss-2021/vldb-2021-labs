@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This is the labs of VLDB Summer School 2021. The main target of is implementation of the distributed transaction.
+This is the labs of VLDB Summer School 2021. The target is to build a distributed database.
 
 There are several modules in a distributed database.
 
