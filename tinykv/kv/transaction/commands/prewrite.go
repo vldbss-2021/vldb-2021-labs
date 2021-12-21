@@ -1,8 +1,12 @@
 package commands
 
 import (
+	"encoding/hex"
+
 	"github.com/pingcap-incubator/tinykv/kv/transaction/mvcc"
 	"github.com/pingcap-incubator/tinykv/proto/pkg/kvrpcpb"
+	"github.com/pingcap/log"
+	"go.uber.org/zap"
 )
 
 // Prewrite represents the prewrite stage of a transaction. A prewrite contains all writes (but not reads) in a transaction,
@@ -59,6 +63,8 @@ func (p *Prewrite) PrepareWrites(txn *mvcc.MvccTxn) (interface{}, error) {
 // locked or there is any other key error, and (nil, err) if an internal error occurs.
 func (p *Prewrite) prewriteMutation(txn *mvcc.MvccTxn, mut *kvrpcpb.Mutation) (*kvrpcpb.KeyError, error) {
 	key := mut.Key
+	log.Debug("prewrite key", zap.Uint64("start_ts", txn.StartTS),
+		zap.String("key", hex.EncodeToString(key)))
 	// YOUR CODE HERE (lab2).
 	// Check for write conflicts.
 	// Hint: Check the interafaces provided by `mvcc.MvccTxn`. The error type `kvrpcpb.WriteConflict` is used

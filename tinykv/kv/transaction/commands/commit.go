@@ -3,11 +3,12 @@ package commands
 import (
 	"encoding/hex"
 	"fmt"
+	"reflect"
+
 	"github.com/pingcap-incubator/tinykv/kv/transaction/mvcc"
 	"github.com/pingcap-incubator/tinykv/proto/pkg/kvrpcpb"
 	"github.com/pingcap/log"
 	"go.uber.org/zap"
-	"reflect"
 )
 
 type Commit struct {
@@ -53,6 +54,9 @@ func commitKey(key []byte, commitTs uint64, txn *mvcc.MvccTxn, response interfac
 
 	// If there is no correspond lock for this transaction.
 	panic("commitKey is not implemented yet")
+	log.Debug("commitKey", zap.Uint64("startTS", txn.StartTS),
+		zap.Uint64("commitTs", commitTs),
+		zap.String("key", hex.EncodeToString(key)))
 	if lock == nil || lock.Ts != txn.StartTS {
 		// YOUR CODE HERE (lab2).
 		// Key is locked by a different transaction, or there is no lock on the key. It's needed to

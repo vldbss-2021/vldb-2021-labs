@@ -1,8 +1,12 @@
 package commands
 
 import (
+	"encoding/hex"
+
 	"github.com/pingcap-incubator/tinykv/kv/transaction/mvcc"
 	"github.com/pingcap-incubator/tinykv/proto/pkg/kvrpcpb"
+	"github.com/pingcap/log"
+	"go.uber.org/zap"
 )
 
 type Get struct {
@@ -23,6 +27,8 @@ func NewGet(request *kvrpcpb.GetRequest) Get {
 
 func (g *Get) Read(txn *mvcc.RoTxn) (interface{}, [][]byte, error) {
 	key := g.request.Key
+	log.Debug("read key", zap.Uint64("start_ts", txn.StartTS),
+		zap.String("key", hex.EncodeToString(key)))
 	response := new(kvrpcpb.GetResponse)
 
 	panic("kv get is not implemented yet")
