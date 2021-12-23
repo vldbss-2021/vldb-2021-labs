@@ -55,7 +55,11 @@ func rollbackKey(key []byte, txn *mvcc.MvccTxn, response interface{}) (interface
 			return nil, err
 		}
 		// Try to insert a rollback record if there's no correspond records, use `mvcc.WriteKindRollback` to represent
-		// the type. Also the command could be stale that the record is already rolled back or commmited.
+		// the type. Also the command could be stale that the record is already rolled back or committed.
+		// If there is no write either, presumably the prewrite was lost. We insert a rollback write anyway.
+		// if the key has already been rolled back, so nothing to do.
+		// If the key has already been committed. This should not happen since the client should never send both
+		// commit and rollback requests.
 		// There is no write either, presumably the prewrite was lost. We insert a rollback write anyway.
 		if existingWrite == nil {
 			// YOUR CODE HERE (lab2).
