@@ -404,6 +404,13 @@ func TestBasicRollbackLab2P2(t *testing.T) {
 	mustCommit(t, store, latches, k1, genPhyTS(11), genPhyTS(12))
 	mustGetKV(t, store, latches, k1, genPhyTS(12), v1)
 	mustRollbackErr(t, store, latches, k1, genPhyTS(11))
+
+	// There's no prewrite lock and write records, write rollback anyway, future prewrite
+	// with same start_ts should fail.
+	k3 := []byte("tk3")
+	v3 := []byte("v3")
+	mustRollback(t, store, latches, k3, genPhyTS(20))
+	mustPrewritePutErr(t, store, latches, k3, v3, k3, genPhyTS(20), 10)
 }
 
 func TestBasicResolveLab2P3(t *testing.T) {

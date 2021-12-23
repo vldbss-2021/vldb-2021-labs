@@ -621,16 +621,16 @@ func (d *peerMsgHandler) proposeRaftCommand(msg *raft_cmdpb.RaftCmdRequest, cb *
 	panic("not implemented yet")
 	// YOUR CODE HERE (lab1).
 	// Hint1: do `preProposeRaftCommand` check for the command, if the check fails, need to execute the
-	// callback function and return the error results.
+	// callback function and return the error results. `ErrResp` is useful to generate error response.
 
 	// Hint2: Check if peer is stopped already, if so notify the callback that the region is removed, check
-	// the `destroy` function for related utilities.
+	// the `destroy` function for related utilities. `NotifyReqRegionRemoved` is useful to generate error response.
 
 	// Hint3: Bind the possible response with term then do the real requests propose using the `Propose` function.
 	// Note:
 	// The peer that is being checked is a leader. It might step down to be a follower later. It
 	// doesn't matter whether the peer is a leader or not. If it's not a leader, the proposing
-	// command log entry can't be committed.
+	// command log entry can't be committed. There are some useful information in the `ctx` of the `peerMsgHandler`.
 }
 
 func (d *peerMsgHandler) findSiblingRegion() (result *metapb.Region) {

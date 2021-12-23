@@ -3,12 +3,12 @@ package commands
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/pingcap/log"
-	"go.uber.org/zap"
 	"reflect"
 
 	"github.com/pingcap-incubator/tinykv/kv/transaction/mvcc"
 	"github.com/pingcap-incubator/tinykv/proto/pkg/kvrpcpb"
+	"github.com/pingcap/log"
+	"go.uber.org/zap"
 )
 
 type Rollback struct {
@@ -47,16 +47,22 @@ func rollbackKey(key []byte, txn *mvcc.MvccTxn, response interface{}) (interface
 		zap.Uint64("startTS", txn.StartTS),
 		zap.String("key", hex.EncodeToString(key)))
 
+	panic("rollbackKey is not implemented yet")
 	if lock == nil || lock.Ts != txn.StartTS {
 		// There is no lock, check the write status.
 		existingWrite, ts, err := txn.CurrentWrite(key)
 		if err != nil {
 			return nil, err
 		}
+		// Try to insert a rollback record if there's no correspond records, use `mvcc.WriteKindRollback` to represent
+		// the type. Also the command could be stale that the record is already rolled back or committed.
+		// If there is no write either, presumably the prewrite was lost. We insert a rollback write anyway.
+		// if the key has already been rolled back, so nothing to do.
+		// If the key has already been committed. This should not happen since the client should never send both
+		// commit and rollback requests.
+		// There is no write either, presumably the prewrite was lost. We insert a rollback write anyway.
 		if existingWrite == nil {
-			// There is no write either, presumably the prewrite was lost. We insert a rollback write anyway.
-			write := mvcc.Write{StartTS: txn.StartTS, Kind: mvcc.WriteKindRollback}
-			txn.PutWrite(key, txn.StartTS, &write)
+			// YOUR CODE HERE (lab2).
 
 			return nil, nil
 		} else {

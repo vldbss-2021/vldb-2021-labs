@@ -1,8 +1,12 @@
 package commands
 
 import (
+	"encoding/hex"
+
 	"github.com/pingcap-incubator/tinykv/kv/transaction/mvcc"
 	"github.com/pingcap-incubator/tinykv/proto/pkg/kvrpcpb"
+	"github.com/pingcap/log"
+	"go.uber.org/zap"
 )
 
 type Get struct {
@@ -23,29 +27,18 @@ func NewGet(request *kvrpcpb.GetRequest) Get {
 
 func (g *Get) Read(txn *mvcc.RoTxn) (interface{}, [][]byte, error) {
 	key := g.request.Key
+	log.Debug("read key", zap.Uint64("start_ts", txn.StartTS),
+		zap.String("key", hex.EncodeToString(key)))
 	response := new(kvrpcpb.GetResponse)
 
+	panic("kv get is not implemented yet")
+	// YOUR CODE HERE (lab2).
 	// Check for locks and their visibilities.
-	lock, err := txn.GetLock(key)
-	if err != nil {
-		return nil, nil, err
-	}
-	if lock.IsLockedFor(key, txn.StartTS, response) {
-		// Key is locked.
-		return response, nil, nil
-	}
+	// Hint: Check the interfaces provided by `mvcc.RoTxn`.
 
-	// Search writes for a committed value.
-	value, err := txn.GetValue(key)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	if value == nil {
-		response.NotFound = true
-	} else {
-		response.Value = value
-	}
+	// YOUR CODE HERE (lab2).
+	// Search writes for a committed value, set results in the response.
+	// Hint: Check the interfaces provided by `mvcc.RoTxn`.
 
 	return response, nil, nil
 }

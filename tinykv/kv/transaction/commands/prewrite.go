@@ -1,8 +1,12 @@
 package commands
 
 import (
+	"encoding/hex"
+
 	"github.com/pingcap-incubator/tinykv/kv/transaction/mvcc"
 	"github.com/pingcap-incubator/tinykv/proto/pkg/kvrpcpb"
+	"github.com/pingcap/log"
+	"go.uber.org/zap"
 )
 
 // Prewrite represents the prewrite stage of a transaction. A prewrite contains all writes (but not reads) in a transaction,
@@ -59,46 +63,24 @@ func (p *Prewrite) PrepareWrites(txn *mvcc.MvccTxn) (interface{}, error) {
 // locked or there is any other key error, and (nil, err) if an internal error occurs.
 func (p *Prewrite) prewriteMutation(txn *mvcc.MvccTxn, mut *kvrpcpb.Mutation) (*kvrpcpb.KeyError, error) {
 	key := mut.Key
+	log.Debug("prewrite key", zap.Uint64("start_ts", txn.StartTS),
+		zap.String("key", hex.EncodeToString(key)))
+	// YOUR CODE HERE (lab2).
 	// Check for write conflicts.
-	if write, writeCommitTS, err := txn.MostRecentWrite(key); write != nil && err == nil {
-		if writeCommitTS >= txn.StartTS {
-			keyError := new(kvrpcpb.KeyError)
-			keyError.Conflict = &kvrpcpb.WriteConflict{
-				StartTs:    txn.StartTS,
-				ConflictTs: write.StartTS,
-				Key:        key,
-				Primary:    p.request.PrimaryLock,
-			}
-			return keyError, nil
-		}
-	} else if err != nil {
-		return nil, err
-	}
+	// Hint: Check the interafaces provided by `mvcc.MvccTxn`. The error type `kvrpcpb.WriteConflict` is used
+	//		 denote to write conflict error, try to set error information properly in the `kvrpcpb.KeyError`
+	//		 response.
+	panic("prewriteMutation is not implemented yet")
 
-	// Check if key is locked.
-	if existingLock, err := txn.GetLock(key); err != nil {
-		return nil, err
-	} else if existingLock != nil {
-		if existingLock.Ts != txn.StartTS {
-			// Key is locked by someone else.
-			keyError := new(kvrpcpb.KeyError)
-			keyError.Locked = existingLock.Info(key)
-			return keyError, nil
-		} else {
-			// Key is locked by us
-			return nil, nil
-		}
-	}
+	// YOUR CODE HERE (lab2).
+	// Check if key is locked. Report key is locked error if lock does exist, note the key could be locked
+	// by this transaction already and the current prewrite request is stale.
+	panic("check lock in prewrite is not implemented yet")
 
+	// YOUR CODE HERE (lab2).
 	// Write a lock and value.
-	lock := mvcc.Lock{
-		Primary: p.request.PrimaryLock,
-		Ts:      txn.StartTS,
-		Kind:    mvcc.WriteKindFromProto(mut.Op),
-		Ttl:     p.request.LockTtl,
-	}
-	txn.PutLock(key, &lock)
-	txn.PutValue(key, mut.Value)
+	// Hint: Check the interfaces provided by `mvccTxn.Txn`.
+	panic("lock record generation is not implemented yet")
 
 	return nil, nil
 }
