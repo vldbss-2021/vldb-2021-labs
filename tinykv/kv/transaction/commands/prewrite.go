@@ -73,7 +73,8 @@ func (p *Prewrite) prewriteMutation(txn *mvcc.MvccTxn, mut *kvrpcpb.Mutation) (*
 	panic("prewriteMutation is not implemented yet")
 
 	// YOUR CODE HERE (lab2).
-	// Check if key is locked.
+	// Check if key is locked. Report key is locked error if lock does exist, note the key could be locked
+	// by this transaction already and the current prewrite request is stale.
 	panic("check lock in prewrite is not implemented yet")
 
 	// YOUR CODE HERE (lab2).

@@ -59,7 +59,9 @@ func (c *CheckTxnStatus) PrepareWrites(txn *mvcc.MvccTxn) (interface{}, error) {
 	panic("CheckTxnStatus is not implemented yet")
 	if existingWrite == nil {
 		// YOUR CODE HERE (lab2).
-		// The lock never existed, roll it back. Note try to set correct `response.Action`,
+		// The lock never existed, it's still needed to put a rollback record on it so that
+		// the stale transaction commands such as prewrite on the key will fail.
+		// Note try to set correct `response.Action`,
 		// the action types could be found in kvrpcpb.Action_xxx.
 
 		return response, nil

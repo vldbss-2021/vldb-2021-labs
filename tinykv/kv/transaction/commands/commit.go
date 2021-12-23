@@ -61,7 +61,7 @@ func commitKey(key []byte, commitTs uint64, txn *mvcc.MvccTxn, response interfac
 		// YOUR CODE HERE (lab2).
 		// Key is locked by a different transaction, or there is no lock on the key. It's needed to
 		// check the commit/rollback record for this key, if nothing is found report lock not found
-		// error. Also the commit request could be stale.
+		// error. Also the commit request could be stale that it's already committed or rolled back.
 
 		respValue := reflect.ValueOf(response)
 		keyError := &kvrpcpb.KeyError{Retryable: fmt.Sprintf("lock not found for key %v", key)}
