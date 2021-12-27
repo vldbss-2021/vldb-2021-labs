@@ -136,10 +136,14 @@ There are some useful comments and guidance around them.
 
 
 As the `raftStore` is quite complex so the tests are split into 4 parts, there is more information in the `Makefile` file, the order of the tests are:
-- `make lab1P1a`. If it succeeds then tests could be run using `make lab1P1b` with fault injections. This is about the basic tests of `raftStore` logic.
-- `make lab1P2a`. If it succeeds then tests could be run using `make lab1P2b` with fault injections. This is about the persistency tests of `raftStore`.
-- `make lab1P3a`. If it succeeds then tests could be run using `make lab1P3b` with fault injections. This is about the snapshot related tests of `raftStore`.
-- `make lab1P4a`. If it succeeds then tests could be run using `make lab1P4b` with fault injections. This is about the configuration change tests of `raftStore`.
+- `make lab1P1a`. This is about the basic tests of `raftStore` logic.
+- `make lab1P1b` with fault injections. This is about the basic tests of `raftStore` logic.
+- `make lab1P2a`. This is about the persistency tests of `raftStore`.
+- `make lab1P2b` with fault injections. This is about the persistency tests of `raftStore`.
+- `make lab1P3a`. This is about the snapshot related tests of `raftStore`.
+- `make lab1P3b` with fault injections. This is about the snapshot related tests of `raftStore`.
+- `make lab1P4a`. This is about the configuration change tests of `raftStore`.
+- `make lab1P4b` with fault injections. This is about the configuration change tests of `raftStore`.
 
 Things to note:
 - When the tests has failed, there will be some trash directory or files in `/tmp/test-raftstore-xxx`, they could be removed by hand, or the `make clean` command could be used to do the cleanup work.
