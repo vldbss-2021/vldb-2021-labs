@@ -43,7 +43,7 @@ Lock Resolver 的职责就是当一个事务在提交过程中遇到 Lock 时，
 
 在 `lock_resolver.go` 中完成 `getTxnStatus` 和 `resolveLock` 函数，使得向外暴露的 `ResolveLocks` 函数能够正常运行。
 
-除了在事务的提交过程中，事务对数据进行读取的时候也可能遇到 Lock，此时也会出发 `ResolveLocks` 函数，完成 `snapshot.go` 中的 `tikvSnapshot.get` 函数，让读请求能够正常运行。
+除了在事务的提交过程中，事务对数据进行读取的时候也可能遇到 Lock，此时也会触发 `ResolveLocks` 函数，完成 `snapshot.go` 中的 `tikvSnapshot.get` 函数，让读请求能够正常运行。
 
 ## Failpoint
 
