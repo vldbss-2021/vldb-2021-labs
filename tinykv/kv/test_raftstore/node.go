@@ -199,7 +199,7 @@ func (c *NodeSimulator) GetStoreIds() []uint64 {
 	return storeIDs
 }
 
-func (c *NodeSimulator) CallCommandOnStore(storeID uint64, request *raft_cmdpb.RaftCmdRequest, timeout time.Duration) (*raft_cmdpb.RaftCmdResponse, *badger.Txn) {
+func (c *NodeSimulator) CallCommandOnStore(storeID uint64, request *raft_cmdpb.RaftCmdRequest, timeout time.Duration) (*raft_cmdpb.RaftCmdResponse, *badger.Txn, error) {
 	c.RLock()
 	router := c.trans.routers[storeID]
 	if router == nil {
@@ -210,9 +210,9 @@ func (c *NodeSimulator) CallCommandOnStore(storeID uint64, request *raft_cmdpb.R
 	cb := message.NewCallback()
 	err := router.SendRaftCommand(request, cb)
 	if err != nil {
-		return nil, nil
+		return nil, nil, err
 	}
 
 	resp := cb.WaitRespWithTimeout(timeout)
-	return resp, cb.Txn
+	return resp, cb.Txn, nil
 }

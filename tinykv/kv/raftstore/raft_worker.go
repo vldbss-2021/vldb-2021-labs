@@ -36,6 +36,9 @@ func newRaftWorker(ctx *GlobalContext, pm *router) *raftWorker {
 func (rw *raftWorker) run(closeCh <-chan struct{}, wg *sync.WaitGroup) {
 	defer wg.Done()
 	var msgs []message.Msg
+	// Limit the maximum messages processed per loop, too many messages could make the raft loop stuck
+	// if the io write is slow.
+	maxMsgPerLoop := 256
 	for {
 		msgs = msgs[:0]
 		select {
@@ -46,6 +49,9 @@ func (rw *raftWorker) run(closeCh <-chan struct{}, wg *sync.WaitGroup) {
 			msgs = append(msgs, msg)
 		}
 		pending := len(rw.raftCh)
+		if pending > maxMsgPerLoop {
+			pending = maxMsgPerLoop
+		}
 		for i := 0; i < pending; i++ {
 			msgs = append(msgs, <-rw.raftCh)
 		}

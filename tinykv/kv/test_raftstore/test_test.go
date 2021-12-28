@@ -205,12 +205,16 @@ func GenericTest(t *testing.T, part string, nclients int, unreliable bool, crash
 					start := strconv.Itoa(cli) + " " + fmt.Sprintf("%08d", 0)
 					end := strconv.Itoa(cli) + " " + fmt.Sprintf("%08d", j)
 					// log.Info(fmt.Sprintf("%d: client new scan %v-%v\n", cli, start, end))
-					values := cluster.Scan([]byte(start), []byte(end))
+					values, err := cluster.Scan([]byte(start), []byte(end))
+					if err != nil {
+						log.Fatal(fmt.Sprintf("scan error=%v", err))
+					}
 					v := string(bytes.Join(values, []byte("")))
 					if v != last {
 						log.Fatal(fmt.Sprintf("get wrong value, client %v\nwant:%v\ngot: %v\n", cli, last, v))
 					}
 				}
+				time.Sleep(50 * time.Millisecond)
 			}
 		})
 
@@ -267,7 +271,10 @@ func GenericTest(t *testing.T, part string, nclients int, unreliable bool, crash
 			// }
 			start := strconv.Itoa(cli) + " " + fmt.Sprintf("%08d", 0)
 			end := strconv.Itoa(cli) + " " + fmt.Sprintf("%08d", j)
-			values := cluster.Scan([]byte(start), []byte(end))
+			values, err := cluster.Scan([]byte(start), []byte(end))
+			if err != nil {
+				log.Fatal(fmt.Sprintf("scan error=%v", err))
+			}
 			v := string(bytes.Join(values, []byte("")))
 			checkClntAppends(t, cli, v, j)
 
@@ -286,7 +293,7 @@ func GenericTest(t *testing.T, part string, nclients int, unreliable bool, crash
 			for {
 				region := cluster.GetRegion(key)
 				if region == nil {
-					panic("region is not found")
+					t.Fatal("region is not found")
 				}
 				for _, engine := range cluster.engines {
 					state, err := meta.GetApplyState(engine.Kv, region.GetId())
@@ -294,7 +301,7 @@ func GenericTest(t *testing.T, part string, nclients int, unreliable bool, crash
 						continue
 					}
 					if err != nil {
-						panic(err)
+						t.Fatalf("unexpected error=%v", err)
 					}
 					truncatedIdx := state.TruncatedState.Index
 					appliedIdx := state.AppliedIndex
@@ -656,7 +663,8 @@ func TestOneSplit3BLab1P4a(t *testing.T) {
 	assert.True(t, bytes.Equal(right.GetEndKey(), region.GetEndKey()))
 
 	req := NewRequest(left.GetId(), left.GetRegionEpoch(), []*raft_cmdpb.Request{NewGetCfCmd(engine_util.CfDefault, []byte("k2"))})
-	resp, _ := cluster.CallCommandOnLeader(&req, time.Second)
+	resp, _, err := cluster.CallCommandOnLeader(&req, time.Second)
+	assert.NoError(t, err)
 	assert.NotNil(t, resp.GetHeader().GetError())
 	assert.NotNil(t, resp.GetHeader().GetError().GetKeyNotInRegion())
 
