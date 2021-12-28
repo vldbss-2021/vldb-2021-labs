@@ -28,7 +28,7 @@ type Simulator interface {
 	AddFilter(filter Filter)
 	ClearFilters()
 	GetStoreIds() []uint64
-	CallCommandOnStore(storeID uint64, request *raft_cmdpb.RaftCmdRequest, timeout time.Duration) (*raft_cmdpb.RaftCmdResponse, *badger.Txn)
+	CallCommandOnStore(storeID uint64, request *raft_cmdpb.RaftCmdRequest, timeout time.Duration) (*raft_cmdpb.RaftCmdResponse, *badger.Txn, error)
 }
 
 type Cluster struct {
@@ -59,7 +59,7 @@ func (c *Cluster) Start() {
 	for storeID := uint64(1); storeID <= uint64(c.count); storeID++ {
 		dbPath, err := ioutil.TempDir("", "test-raftstore")
 		if err != nil {
-			panic(err)
+			log.Fatal(fmt.Sprintf("creating storage path unexpected error=%v", err))
 		}
 		c.cfg.DBPath = dbPath
 		kvPath := filepath.Join(dbPath, "kv")
@@ -70,15 +70,15 @@ func (c *Cluster) Start() {
 
 		err = os.MkdirAll(kvPath, os.ModePerm)
 		if err != nil {
-			panic(err)
+			log.Fatal(fmt.Sprintf("creating storage path unexpected error=%v", err))
 		}
 		err = os.MkdirAll(raftPath, os.ModePerm)
 		if err != nil {
-			panic(err)
+			log.Fatal(fmt.Sprintf("creating storage path unexpected error=%v", err))
 		}
 		err = os.MkdirAll(snapPath, os.ModePerm)
 		if err != nil {
-			panic(err)
+			log.Fatal(fmt.Sprintf("creating storage path unexpected error=%v", err))
 		}
 
 		raftDB := engine_util.CreateDB("raft", c.cfg)
@@ -103,12 +103,15 @@ func (c *Cluster) Start() {
 		firstRegion.Peers = append(firstRegion.Peers, peer)
 		err := raftstore.BootstrapStore(engine, clusterID, storeID)
 		if err != nil {
-			panic(err)
+			log.Fatal(fmt.Sprintf("bootstrap store=%v unexpected error=%v", storeID, err))
 		}
 	}
 
 	for _, engine := range c.engines {
-		raftstore.PrepareBootstrapCluster(engine, firstRegion)
+		err := raftstore.PrepareBootstrapCluster(engine, firstRegion)
+		if err != nil {
+			log.Fatal(fmt.Sprintf("prepare bootstrap cluster unexpected error=%v", err))
+		}
 	}
 
 	store := &metapb.Store{
@@ -117,10 +120,10 @@ func (c *Cluster) Start() {
 	}
 	resp, err := c.schedulerClient.Bootstrap(context.TODO(), store)
 	if err != nil {
-		panic(err)
+		log.Fatal(fmt.Sprintf("bootstrap cluster using scheduler client unexpected error=%v", err))
 	}
 	if resp.Header != nil && resp.Header.Error != nil {
-		panic(resp.Header.Error)
+		log.Fatal(fmt.Sprintf("bootstrap cluster using scheduler client unexpected error=%v", resp.Header.Error.String()))
 	}
 
 	for storeID, engine := range c.engines {
@@ -130,9 +133,12 @@ func (c *Cluster) Start() {
 		}
 		err := c.schedulerClient.PutStore(context.TODO(), store)
 		if err != nil {
-			panic(err)
+			log.Fatal(fmt.Sprintf("put store=%v using scheduler client unexpected error=%v", storeID, err))
 		}
-		raftstore.ClearPrepareBootstrapState(engine)
+		err = raftstore.ClearPrepareBootstrapState(engine)
+		if err != nil {
+			log.Fatal(fmt.Sprintf("clear bootstrap cluster unexpected error=%v", err))
+		}
 	}
 
 	for storeID := range c.engines {
@@ -171,64 +177,71 @@ func (c *Cluster) StartServer(storeID uint64) {
 	engine := c.engines[storeID]
 	err := c.simulator.RunStore(c.cfg, engine, context.TODO())
 	if err != nil {
-		panic(err)
+		log.Fatal(fmt.Sprintf("start server unexpected error=%v", err))
 	}
 }
 
 func (c *Cluster) AllocPeer(storeID uint64) *metapb.Peer {
 	id, err := c.schedulerClient.AllocID(context.TODO())
 	if err != nil {
-		panic(err)
+		log.Fatal(fmt.Sprintf("alloc peer unexpected error=%v", err))
 	}
 	return NewPeer(storeID, id)
 }
 
-func (c *Cluster) Request(key []byte, reqs []*raft_cmdpb.Request, timeout time.Duration) (*raft_cmdpb.RaftCmdResponse, *badger.Txn) {
+func (c *Cluster) Request(key []byte, reqs []*raft_cmdpb.Request, timeout time.Duration) (*raft_cmdpb.RaftCmdResponse, *badger.Txn, error) {
 	startTime := time.Now()
 	for i := 0; i < 10 || time.Now().Sub(startTime) < timeout; i++ {
 		region := c.GetRegion(key)
 		regionID := region.GetId()
 		req := NewRequest(regionID, region.RegionEpoch, reqs)
-		resp, txn := c.CallCommandOnLeader(&req, timeout)
+		resp, txn, err := c.CallCommandOnLeader(&req, timeout)
+		if err != nil {
+			SleepMS(500)
+			continue
+		}
 		if resp == nil {
 			// it should be timeouted innerly
-			SleepMS(100)
+			SleepMS(500)
 			continue
 		}
 		if resp.Header.Error != nil {
-			SleepMS(100)
+			SleepMS(500)
 			continue
 		}
-		return resp, txn
+		return resp, txn, nil
 	}
-	panic("request timeout")
+	return nil, nil, fmt.Errorf("request timed out duration=%v", timeout)
 }
 
-func (c *Cluster) CallCommand(request *raft_cmdpb.RaftCmdRequest, timeout time.Duration) (*raft_cmdpb.RaftCmdResponse, *badger.Txn) {
+func (c *Cluster) CallCommand(request *raft_cmdpb.RaftCmdRequest, timeout time.Duration) (*raft_cmdpb.RaftCmdResponse, *badger.Txn, error) {
 	storeID := request.Header.Peer.StoreId
 	return c.simulator.CallCommandOnStore(storeID, request, timeout)
 }
 
-func (c *Cluster) CallCommandOnLeader(request *raft_cmdpb.RaftCmdRequest, timeout time.Duration) (*raft_cmdpb.RaftCmdResponse, *badger.Txn) {
+func (c *Cluster) CallCommandOnLeader(request *raft_cmdpb.RaftCmdRequest, timeout time.Duration) (*raft_cmdpb.RaftCmdResponse, *badger.Txn, error) {
 	startTime := time.Now()
 	regionID := request.Header.RegionId
 	leader := c.LeaderOfRegion(regionID)
 	for {
 		if time.Now().Sub(startTime) > timeout {
-			return nil, nil
+			return nil, nil, fmt.Errorf("request has timed out duration=%v", timeout)
 		}
 		if leader == nil {
-			panic(fmt.Sprintf("can't get leader of region %d", regionID))
+			log.Fatal(fmt.Sprintf("can't get leader of region %d", regionID))
 		}
 		request.Header.Peer = leader
-		resp, txn := c.CallCommand(request, 1*time.Second)
+		resp, txn, err := c.CallCommand(request, 1*time.Second)
+		if err != nil {
+			return nil, nil, err
+		}
 		if resp == nil {
 			log.Debug(fmt.Sprintf("can't call command %s on leader %d of region %d", request.String(), leader.GetId(), regionID))
 			newLeader := c.LeaderOfRegion(regionID)
 			if leader == newLeader {
 				region, _, err := c.schedulerClient.GetRegionByID(context.TODO(), regionID)
 				if err != nil {
-					return nil, nil
+					return nil, nil, err
 				}
 				peers := region.GetPeers()
 				leader = peers[rand.Int()%len(peers)]
@@ -251,7 +264,7 @@ func (c *Cluster) CallCommandOnLeader(request *raft_cmdpb.RaftCmdRequest, timeou
 				continue
 			}
 		}
-		return resp, txn
+		return resp, txn, nil
 	}
 }
 
@@ -276,7 +289,8 @@ func (c *Cluster) GetRegion(key []byte) *metapb.Region {
 		// retry to get the region again.
 		SleepMS(20)
 	}
-	panic(fmt.Sprintf("find no region for %s", hex.EncodeToString(key)))
+	log.Fatal(fmt.Sprintf("find no region for %s", hex.EncodeToString(key)))
+	return nil
 }
 
 func (c *Cluster) GetRandomRegion() *metapb.Region {
@@ -286,7 +300,7 @@ func (c *Cluster) GetRandomRegion() *metapb.Region {
 func (c *Cluster) GetStoreIdsOfRegion(regionID uint64) []uint64 {
 	region, _, err := c.schedulerClient.GetRegionByID(context.TODO(), regionID)
 	if err != nil {
-		panic(err)
+		log.Fatal(fmt.Sprintf(" get region by id=%v unexpected error=%v", region, err))
 	}
 	peers := region.GetPeers()
 	storeIds := make([]uint64, len(peers))
@@ -300,44 +314,55 @@ func (c *Cluster) MustPut(key, value []byte) {
 	c.MustPutCF(engine_util.CfDefault, key, value)
 }
 
-func (c *Cluster) MustPutCF(cf string, key, value []byte) {
+func (c *Cluster) MustPutCF(cf string, key, value []byte) error {
 	req := NewPutCfCmd(cf, key, value)
-	resp, _ := c.Request(key, []*raft_cmdpb.Request{req}, 5*time.Second)
+	resp, _, err := c.Request(key, []*raft_cmdpb.Request{req}, 5*time.Second)
+	if err != nil {
+		log.Fatal(fmt.Sprintf("request failed err=%v", err))
+		return err
+	}
 	if resp.Header.Error != nil {
-		panic(resp.Header.Error)
+		log.Fatal(fmt.Sprintf("error exists in response err=%v", resp.Header.Error.String()))
+		return fmt.Errorf("err=%v", resp.Header.Error.String())
 	}
 	if len(resp.Responses) != 1 {
-		panic("len(resp.Responses) != 1")
+		log.Fatal(fmt.Sprintf("unexpected len(resp.Responses)=%v, should be 1", len(resp.Responses)))
+		return fmt.Errorf("unexpected len(resp.Responses)=%v, should be 1", len(resp.Responses))
 	}
 	if resp.Responses[0].CmdType != raft_cmdpb.CmdType_Put {
-		panic("resp.Responses[0].CmdType != raft_cmdpb.CmdType_Put")
+		log.Fatal(fmt.Sprintf("unexpected response=%v, should be CmdType_Put", resp.Responses[0].String()))
+		return fmt.Errorf("unexpected response=%v, should be CmdType_Put", resp.Responses[0].String())
 	}
+	return nil
 }
 
 func (c *Cluster) MustGet(key []byte, value []byte) {
-	v := c.Get(key)
+	v, err := c.Get(key)
+	if err != nil {
+		log.Fatal(fmt.Sprintf("get error=%v", err))
+	}
 	if !bytes.Equal(v, value) {
-		panic(fmt.Sprintf("expected value %s, but got %s", value, v))
+		log.Fatal(fmt.Sprintf("expected value %s, but got %s", value, v))
 	}
 }
 
-func (c *Cluster) Get(key []byte) []byte {
+func (c *Cluster) Get(key []byte) ([]byte, error) {
 	return c.GetCF(engine_util.CfDefault, key)
 }
 
-func (c *Cluster) GetCF(cf string, key []byte) []byte {
+func (c *Cluster) GetCF(cf string, key []byte) ([]byte, error) {
 	req := NewGetCfCmd(cf, key)
-	resp, _ := c.Request(key, []*raft_cmdpb.Request{req}, 5*time.Second)
+	resp, _, err := c.Request(key, []*raft_cmdpb.Request{req}, 5*time.Second)
 	if resp.Header.Error != nil {
-		panic(resp.Header.Error)
+		return nil, err
 	}
 	if len(resp.Responses) != 1 {
-		panic("len(resp.Responses) != 1")
+		return nil, fmt.Errorf("unexpected len(resp.Responses)=%v, should be 1", len(resp.Responses))
 	}
 	if resp.Responses[0].CmdType != raft_cmdpb.CmdType_Get {
-		panic("resp.Responses[0].CmdType != raft_cmdpb.CmdType_Get")
+		return nil, fmt.Errorf("unexpected response=%v, should be CmdType_Get", resp.Responses[0].String())
 	}
-	return resp.Responses[0].Get.Value
+	return resp.Responses[0].Get.Value, nil
 }
 
 func (c *Cluster) MustDelete(key []byte) {
@@ -346,32 +371,38 @@ func (c *Cluster) MustDelete(key []byte) {
 
 func (c *Cluster) MustDeleteCF(cf string, key []byte) {
 	req := NewDeleteCfCmd(cf, key)
-	resp, _ := c.Request(key, []*raft_cmdpb.Request{req}, 5*time.Second)
+	resp, _, err := c.Request(key, []*raft_cmdpb.Request{req}, 5*time.Second)
+	if err != nil {
+		log.Fatal(fmt.Sprintf("request failed err=%v", err))
+	}
 	if resp.Header.Error != nil {
-		panic(resp.Header.Error)
+		log.Fatal(fmt.Sprintf("MustDeleteCF error in response error=%v", err))
 	}
 	if len(resp.Responses) != 1 {
-		panic("len(resp.Responses) != 1")
+		log.Fatal(fmt.Sprintf("unexpected len(resp.Responses)=%v, should be 1", len(resp.Responses)))
 	}
 	if resp.Responses[0].CmdType != raft_cmdpb.CmdType_Delete {
-		panic("resp.Responses[0].CmdType != raft_cmdpb.CmdType_Delete")
+		log.Fatal(fmt.Sprintf("resp.Responses[0].CmdType != raft_cmdpb.CmdType_Delete"))
 	}
 }
 
-func (c *Cluster) Scan(start, end []byte) [][]byte {
+func (c *Cluster) Scan(start, end []byte) ([][]byte, error) {
 	req := NewSnapCmd()
 	values := make([][]byte, 0)
 	key := start
 	for (len(end) != 0 && bytes.Compare(key, end) < 0) || (len(key) == 0 && len(end) == 0) {
-		resp, txn := c.Request(key, []*raft_cmdpb.Request{req}, 5*time.Second)
+		resp, txn, err := c.Request(key, []*raft_cmdpb.Request{req}, 5*time.Second)
+		if err != nil {
+			return nil, err
+		}
 		if resp.Header.Error != nil {
-			panic(resp.Header.Error)
+			return nil, fmt.Errorf("%v", resp.Header.Error.String())
 		}
 		if len(resp.Responses) != 1 {
-			panic("len(resp.Responses) != 1")
+			return nil, fmt.Errorf("len(resp.Responses) != 1")
 		}
 		if resp.Responses[0].CmdType != raft_cmdpb.CmdType_Snap {
-			panic("resp.Responses[0].CmdType != raft_cmdpb.CmdType_Snap")
+			return nil, fmt.Errorf("resp.Responses[0].CmdType != raft_cmdpb.CmdType_Snap")
 		}
 		region := resp.Responses[0].GetSnap().Region
 		iter := raft_storage.NewRegionReader(txn, *region).IterCF(engine_util.CfDefault)
@@ -381,7 +412,7 @@ func (c *Cluster) Scan(start, end []byte) [][]byte {
 			}
 			value, err := iter.Item().ValueCopy(nil)
 			if err != nil {
-				panic(err)
+				return nil, err
 			}
 			values = append(values, value)
 		}
@@ -393,19 +424,22 @@ func (c *Cluster) Scan(start, end []byte) [][]byte {
 		}
 	}
 
-	return values
+	return values, nil
 }
 
 func (c *Cluster) TransferLeader(regionID uint64, leader *metapb.Peer) {
 	region, _, err := c.schedulerClient.GetRegionByID(context.TODO(), regionID)
 	if err != nil {
-		panic(err)
+		log.Fatal(fmt.Sprintf("trasfer leader get region by id=%v has failed err=%v", regionID, err))
 	}
 	epoch := region.RegionEpoch
 	transferLeader := NewAdminRequest(regionID, epoch, NewTransferLeaderCmd(leader))
-	resp, _ := c.CallCommandOnLeader(transferLeader, 5*time.Second)
+	resp, _, err := c.CallCommandOnLeader(transferLeader, 5*time.Second)
+	if err != nil {
+		log.Fatal(fmt.Sprintf("trasfer leader call has failed err=%v", err))
+	}
 	if resp.AdminResponse.CmdType != raft_cmdpb.AdminCmdType_TransferLeader {
-		panic("resp.AdminResponse.CmdType != raft_cmdpb.AdminCmdType_TransferLeader")
+		log.Fatal("resp.AdminResponse.CmdType != raft_cmdpb.AdminCmdType_TransferLeader")
 	}
 }
 
@@ -418,7 +452,7 @@ func (c *Cluster) MustTransferLeader(regionID uint64, leader *metapb.Peer) {
 			return
 		}
 		if time.Now().Sub(timer) > 5*time.Second {
-			panic(fmt.Sprintf("failed to transfer leader to [%d] %s", regionID, leader.String()))
+			log.Fatal(fmt.Sprintf("failed to transfer leader to [%d] %s", regionID, leader.String()))
 		}
 		c.TransferLeader(regionID, leader)
 	}
@@ -438,7 +472,7 @@ func (c *Cluster) MustHavePeer(regionID uint64, peer *metapb.Peer) {
 	for i := 0; i < 500; i++ {
 		region, _, err := c.schedulerClient.GetRegionByID(context.TODO(), regionID)
 		if err != nil {
-			panic(err)
+			log.Fatal(fmt.Sprintf("MustHavePeer err=%v", err))
 		}
 		if region != nil {
 			if p := FindPeer(region, peer.GetStoreId()); p != nil {
@@ -449,14 +483,14 @@ func (c *Cluster) MustHavePeer(regionID uint64, peer *metapb.Peer) {
 		}
 		SleepMS(10)
 	}
-	panic(fmt.Sprintf("no peer: %v", peer))
+	log.Fatal(fmt.Sprintf("no peer: %v", peer))
 }
 
 func (c *Cluster) MustNonePeer(regionID uint64, peer *metapb.Peer) {
 	for i := 0; i < 500; i++ {
 		region, _, err := c.schedulerClient.GetRegionByID(context.TODO(), regionID)
 		if err != nil {
-			panic(err)
+			log.Fatal(fmt.Sprintf("MustNonePeer get region by id=%v err=%v", regionID, err))
 		}
 		if region != nil {
 			if p := FindPeer(region, peer.GetStoreId()); p != nil {
@@ -469,5 +503,5 @@ func (c *Cluster) MustNonePeer(regionID uint64, peer *metapb.Peer) {
 		}
 		SleepMS(10)
 	}
-	panic(fmt.Sprintf("have peer: %v", peer))
+	log.Fatal(fmt.Sprintf("have peer: %v", peer))
 }

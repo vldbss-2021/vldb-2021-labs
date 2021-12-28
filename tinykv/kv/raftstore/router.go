@@ -1,6 +1,7 @@
 package raftstore
 
 import (
+	"fmt"
 	"sync"
 	"sync/atomic"
 
@@ -27,7 +28,7 @@ type router struct {
 
 func newRouter(storeSender chan<- message.Msg) *router {
 	pm := &router{
-		peerSender:  make(chan message.Msg, 40960),
+		peerSender:  make(chan message.Msg, 40960*4),
 		storeSender: storeSender,
 	}
 	return pm
@@ -66,7 +67,11 @@ func (pr *router) send(regionID uint64, msg message.Msg) error {
 	if p == nil || atomic.LoadUint32(&p.closed) == 1 {
 		return errPeerNotFound
 	}
-	pr.peerSender <- msg
+	select {
+	case pr.peerSender <- msg:
+	default:
+		return fmt.Errorf("the request channel is full region id=%v", regionID)
+	}
 	return nil
 }
 
