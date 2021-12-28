@@ -616,7 +616,9 @@ func (s *session) execute(ctx context.Context, sql string) (recordSets []sqlexec
 		// Hint: step I.3.2
 		// YOUR CODE HERE (lab4)
 		panic("YOUR CODE HERE")
-		logutil.Logger(ctx).Debug("stmt", zap.String("sql", stmt.Text))
+		if stmt != nil {
+			logutil.Logger(ctx).Debug("stmt", zap.String("sql", stmt.Text))
+		}
 		if err != nil {
 			s.rollbackOnError(ctx)
 			logutil.Logger(ctx).Warn("compile SQL failed",
