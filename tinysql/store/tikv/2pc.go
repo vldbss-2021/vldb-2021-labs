@@ -150,7 +150,10 @@ func (c *twoPhaseCommitter) initKeysAndMutations() error {
 	// Don't forget to update the keys array and statistic information
 	for _, lockKey := range txn.lockKeys {
 		// YOUR CODE HERE (lab3).
-		panic("YOUR CODE HERE")
+		_, ok := mutations[string(lockKey)]
+		if !ok {
+			panic("YOUR CODE HERE")
+		}
 	}
 	if len(keys) == 0 {
 		return nil
@@ -335,9 +338,10 @@ func (c *twoPhaseCommitter) keySize(key []byte) int {
 // You need to build the prewrite request in this function
 // All keys in a batch are in the same region
 func (c *twoPhaseCommitter) buildPrewriteRequest(batch batchKeys) *tikvrpc.Request {
-	// YOUR CODE HERE (lab3).
+	// YOUR CODE HERE (lab3). The commented return statement could be referenced.
 	panic("YOUR CODE HERE")
-	return tikvrpc.NewRequest(tikvrpc.CmdPrewrite, req, pb.Context{})
+	// return tikvrpc.NewRequest(tikvrpc.CmdPrewrite, req, pb.Context{})
+	return nil
 }
 
 // handleSingleBatch prewrites a batch of keys
@@ -418,9 +422,11 @@ func (actionCommit) handleSingleBatch(c *twoPhaseCommitter, bo *Backoffer, batch
 
 	var resp *tikvrpc.Response
 	var err error
+	sender := NewRegionRequestSender(c.store.regionCache, c.store.client)
 	// build and send the commit request
 	// YOUR CODE HERE (lab3).
 	panic("YOUR CODE HERE")
+	logutil.BgLogger().Debug("actionCommit handleSingleBatch", zap.Bool("nil response", resp == nil))
 
 	// If we fail to receive response for the request that commits primary key, it will be undetermined whether this
 	// transaction has been successfully committed.
@@ -505,6 +511,7 @@ func (c *twoPhaseCommitter) execute(ctx context.Context) (err error) {
 			go func() {
 				cleanupKeysCtx := context.WithValue(context.Background(), txnStartKey, ctx.Value(txnStartKey))
 				cleanupBo := NewBackoffer(cleanupKeysCtx, cleanupMaxBackoff).WithVars(c.txn.vars)
+				logutil.BgLogger().Debug("cleanupBo", zap.Bool("nil", cleanupBo == nil))
 				// cleanup phase
 				// YOUR CODE HERE (lab3).
 				panic("YOUR CODE HERE")
@@ -516,6 +523,7 @@ func (c *twoPhaseCommitter) execute(ctx context.Context) (err error) {
 
 	// prewrite phase
 	prewriteBo := NewBackoffer(ctx, PrewriteMaxBackoff).WithVars(c.txn.vars)
+	logutil.BgLogger().Debug("prewriteBo", zap.Bool("nil", prewriteBo == nil))
 	// YOUR CODE HERE (lab3).
 	panic("YOUR CODE HERE")
 
@@ -547,6 +555,7 @@ func (c *twoPhaseCommitter) execute(ctx context.Context) (err error) {
 	}
 
 	commitBo := NewBackoffer(ctx, CommitMaxBackoff).WithVars(c.txn.vars)
+	logutil.BgLogger().Debug("commitBo", zap.Bool("nil", commitBo == nil))
 	// YOUR CODE HERE (lab3).
 	panic("YOUR CODE HERE")
 	return nil

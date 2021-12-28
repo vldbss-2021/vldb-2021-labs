@@ -477,7 +477,6 @@ func (s *testLab3Suite) TestGetResolveLockCommit(c *C) {
 	s.mustUnLock(c, k2)
 }
 
-
 func (s *testLab3Suite) TestGetResolveLockRollback(c *C) {
 	txn, committer := s.preparePrewritedTxn(c, "a", map[string]string{
 		"a": "a",

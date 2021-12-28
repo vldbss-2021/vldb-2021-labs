@@ -227,7 +227,8 @@ func (a *ExecStmt) handleNoDelay(ctx context.Context, e Executor) (bool, sqlexec
 		// Hint: step I.4.3
 		// YOUR CODE HERE (lab4)
 		panic("YOUR CODE HERE")
-		return true, r, err
+		//return true, r, err
+		return true, nil, nil
 	}
 
 	return false, nil, nil

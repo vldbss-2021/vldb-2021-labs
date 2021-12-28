@@ -599,6 +599,10 @@ func (s *session) execute(ctx context.Context, sql string) (recordSets []sqlexec
 
 	compiler := executor.Compiler{Ctx: s}
 	multiQuery := len(stmtNodes) > 1
+	logutil.Logger(ctx).Debug("session execute", zap.Uint64("connID", connID),
+		zap.String("charsetInfo", charsetInfo), zap.String("collation", collation),
+		zap.Uint64("compiler conn", compiler.Ctx.GetSessionVars().ConnectionID),
+		zap.Bool("multiQuery", multiQuery))
 	for _, stmtNode := range stmtNodes {
 		s.sessionVars.StartTime = time.Now()
 		s.PrepareTxnCtx(ctx)
@@ -612,6 +616,7 @@ func (s *session) execute(ctx context.Context, sql string) (recordSets []sqlexec
 		// Hint: step I.3.2
 		// YOUR CODE HERE (lab4)
 		panic("YOUR CODE HERE")
+		logutil.Logger(ctx).Debug("stmt", zap.String("sql", stmt.Text))
 		if err != nil {
 			s.rollbackOnError(ctx)
 			logutil.Logger(ctx).Warn("compile SQL failed",
