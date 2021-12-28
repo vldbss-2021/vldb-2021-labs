@@ -469,7 +469,7 @@ func (c *Cluster) MustRemovePeer(regionID uint64, peer *metapb.Peer) {
 }
 
 func (c *Cluster) MustHavePeer(regionID uint64, peer *metapb.Peer) {
-	for i := 0; i < 500; i++ {
+	for i := 0; i < 200; i++ {
 		region, _, err := c.schedulerClient.GetRegionByID(context.TODO(), regionID)
 		if err != nil {
 			log.Fatal(fmt.Sprintf("MustHavePeer err=%v", err))
@@ -481,13 +481,13 @@ func (c *Cluster) MustHavePeer(regionID uint64, peer *metapb.Peer) {
 				}
 			}
 		}
-		SleepMS(10)
+		SleepMS(100)
 	}
 	log.Fatal(fmt.Sprintf("no peer: %v", peer))
 }
 
 func (c *Cluster) MustNonePeer(regionID uint64, peer *metapb.Peer) {
-	for i := 0; i < 500; i++ {
+	for i := 0; i < 200; i++ {
 		region, _, err := c.schedulerClient.GetRegionByID(context.TODO(), regionID)
 		if err != nil {
 			log.Fatal(fmt.Sprintf("MustNonePeer get region by id=%v err=%v", regionID, err))
@@ -501,7 +501,7 @@ func (c *Cluster) MustNonePeer(regionID uint64, peer *metapb.Peer) {
 				return
 			}
 		}
-		SleepMS(10)
+		SleepMS(100)
 	}
 	log.Fatal(fmt.Sprintf("have peer: %v", peer))
 }

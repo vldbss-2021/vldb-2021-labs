@@ -20,6 +20,8 @@ import (
 	"github.com/pingcap/tidb/parser/mysql"
 	"github.com/pingcap/tidb/types"
 	"github.com/pingcap/tidb/util/chunk"
+	"github.com/pingcap/tidb/util/logutil"
+	"go.uber.org/zap"
 )
 
 // InsertExec represents an insert executor.
@@ -39,6 +41,7 @@ func (e *InsertExec) exec(ctx context.Context, rows [][]types.Datum) error {
 	sessVars.GetWriteStmtBufs().BufStore = kv.NewBufferStore(txn, kv.TempTxnMemBufCap)
 	sessVars.StmtCtx.AddRecordRows(uint64(len(rows)))
 	for _, row := range rows {
+		logutil.BgLogger().Debug("row", zap.Int("col", len(row)))
 		var err error
 		// Hint: step II.4
 		// YOUR CODE HERE (lab4)

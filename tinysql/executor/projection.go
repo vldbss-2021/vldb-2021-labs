@@ -331,6 +331,7 @@ func (f *projectionInputFetcher) run(ctx context.Context) {
 			return
 		}
 		targetWorker := input.targetWorker
+		logutil.Logger(ctx).Debug("targetWorker", zap.Int("targetWorker", len(targetWorker.inputCh)))
 
 		output = readProjectionOutput(f.outputCh, f.globalFinishCh)
 		if output == nil {
