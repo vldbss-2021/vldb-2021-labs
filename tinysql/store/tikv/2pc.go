@@ -130,9 +130,11 @@ func (c *twoPhaseCommitter) initKeysAndMutations() error {
 		//   delete: there is a nil value in membuffer
 		// You need to build the mutations from membuffer here
 		if len(v) > 0 {
+			// `len(v) > 0` means it's a put operation.
 			// YOUR CODE HERE (lab3).
 			panic("YOUR CODE HERE")
 		} else {
+			// `len(v) == 0` means it's a delete operation.
 			// YOUR CODE HERE (lab3).
 			panic("YOUR CODE HERE")
 		}
@@ -338,10 +340,12 @@ func (c *twoPhaseCommitter) keySize(key []byte) int {
 // You need to build the prewrite request in this function
 // All keys in a batch are in the same region
 func (c *twoPhaseCommitter) buildPrewriteRequest(batch batchKeys) *tikvrpc.Request {
-	// YOUR CODE HERE (lab3). The commented return statement could be referenced.
+	var req *pb.PrewriteRequest
+	// Build the prewrite request from the input batch,
+	// should use `twoPhaseCommitter.primary` to ensure that the primary key is not empty.
+	// YOUR CODE HERE (lab3).
 	panic("YOUR CODE HERE")
-	// return tikvrpc.NewRequest(tikvrpc.CmdPrewrite, req, pb.Context{})
-	return nil
+	return tikvrpc.NewRequest(tikvrpc.CmdPrewrite, req, pb.Context{})
 }
 
 // handleSingleBatch prewrites a batch of keys
@@ -556,6 +560,9 @@ func (c *twoPhaseCommitter) execute(ctx context.Context) (err error) {
 
 	commitBo := NewBackoffer(ctx, CommitMaxBackoff).WithVars(c.txn.vars)
 	logutil.BgLogger().Debug("commitBo", zap.Bool("nil", commitBo == nil))
+	// Commit the transaction with `commitBo`.
+	// If there is an error returned by commit operation, you should check if there is an undetermined error before return it.
+	// Undetermined error should be returned if exists, and the database connection will be closed.
 	// YOUR CODE HERE (lab3).
 	panic("YOUR CODE HERE")
 	return nil
