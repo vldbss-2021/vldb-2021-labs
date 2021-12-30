@@ -340,12 +340,12 @@ func (c *twoPhaseCommitter) keySize(key []byte) int {
 // You need to build the prewrite request in this function
 // All keys in a batch are in the same region
 func (c *twoPhaseCommitter) buildPrewriteRequest(batch batchKeys) *tikvrpc.Request {
+	var req *pb.PrewriteRequest
 	// Build the prewrite request from the input batch,
 	// should use `twoPhaseCommitter.primary` to ensure that the primary key is not empty.
 	// YOUR CODE HERE (lab3).
 	panic("YOUR CODE HERE")
-	// return tikvrpc.NewRequest(tikvrpc.CmdPrewrite, req, pb.Context{})
-	return nil
+	return tikvrpc.NewRequest(tikvrpc.CmdPrewrite, req, pb.Context{})
 }
 
 // handleSingleBatch prewrites a batch of keys
