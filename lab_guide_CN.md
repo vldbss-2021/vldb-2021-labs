@@ -57,6 +57,23 @@ git clone https://github.com/vldbss-2021/vldb-labs-yourid.git .
 编码可使用任意熟悉的文本编辑器或者集成开发环境，编码完成之后可在本地通过 `make xxx` 命令触发测试任务，具体可参考每个 lab 的说明文档。如果希望了解具体测试命令执行方法或者执行某个特定的测试用例可
 参考 `Makefile` 中测试命令的具体实现，大部分测试的底层均使用 [`go test`](https://go.dev/doc/tutorial/add-a-test) 进行。
 
+本地测试过程中一些常见的系统参数调整：
+```
+1. 如果内存资源不足，尝试逐个运行单个测试用例，方法为
+go test -v ./kv/test_raftstore -run test_name
+
+2. 测试失败部分临时目录占用空间可能无法清理，需要手工清理，可尝试
+rm -rf /tmp/test-raftstore-xxx 
+清理临时数据
+
+3. 尝试配置更大的 open file limit，避免 too many open files 报错如
+ulimit -n 8192
+
+4. 如果机器内存资源不足，可设置更小的 [GOGC](https://pkg.go.dev/runtime) 环境变量加速内存回收减少物理内存占用，如
+export GOGC=1; make lab1P1b
+export GOGC=1; go test -v --count=1 --parallel=1 -p=1 ./kv/test_raftstore -run TestBasic2BLab1P1a
+```
+
 ### 问题排查方法
 
 问题排查的思路为：
