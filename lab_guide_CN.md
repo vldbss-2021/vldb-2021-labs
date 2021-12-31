@@ -90,8 +90,9 @@ export GOGC=1; go test -v --count=1 --parallel=1 -p=1 ./kv/test_raftstore -run T
 
 一些注意事项：
 ```
-1、尽量使用提供的辅助函数获取类的成员
-2、一些问题的细节或许可以参考参考 [TiDB](https://github.com/pingcap/tidb) 或者 [TiKV](https://github.com/tikv/tikv) 的源码
+1. 尽量使用提供的辅助函数获取类的成员
+2. 一些问题的细节或许可以参考参考 [TiDB](https://github.com/pingcap/tidb) 或者 [TiKV](https://github.com/tikv/tikv) 的源码
+3. 如果没有较大把握，尽量不要改动原有代码
 ```
 
 部分问题也可通过 classroom 同学相互讨论或者与讲师讨论尝试解决。
