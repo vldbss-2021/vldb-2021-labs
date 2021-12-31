@@ -37,7 +37,7 @@ go version go1.16.4 linux/amd64
 均使用 go mod 进行包管理，一般情况下无需手动更改 mod 管理相关内容。
 
 验证方法：
-参考[tutorial](https://go.dev/doc/tutorial/getting-started) 练习使用 go mod 进行开发，管理外部依赖。
+参考 [tutorial](https://go.dev/doc/tutorial/getting-started)  练习使用 go mod 进行开发，管理外部依赖。
 
 ## 实验过程
 
