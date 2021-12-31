@@ -1,4 +1,4 @@
-实验指导手册
+# 实验指导手册
 
 # 准备开发环境
 
@@ -18,9 +18,9 @@
 
 ## 实验准备
 
-vldb summer school 2021 的所有实验相关组件均使用 [`Golang`](https://go.dev/) 实现，需要在开发机配置 golang 相关开发环境。
+vldb summer school 2021 的所有实验相关组件均使用 [`golang`](https://go.dev/) 实现，需要在开发机配置 golang 相关开发环境。
 
-### 安装 Golang
+### 安装 golang
 
 参考 golang [get started](https://go.dev/learn/) 根据开发机平台进行安装，推荐安装 v1.16 golang 版本。
 安装完成后可以本地编译 golang 代码生成可执行程序，例如
@@ -31,7 +31,7 @@ bash> go version
 go version go1.16.4 linux/amd64
 ```
 
-### 理解 Golang 包管理
+### 理解 golang 包管理
 
 [`go module`](https://go.dev/ref/mod) 为 golang 推荐的依赖包管理方式，需要注意的是使用 go mod 方式需要确保环境变量 `GO111MODULE` 处于 `ON` 状态。vldb summer school 2021 的所有实验相关组件
 均使用 go mod 进行包管理，一般情况下无需手动更改 mod 管理相关内容。
@@ -70,5 +70,11 @@ git clone https://github.com/vldbss-2021/vldb-labs-yourid.git .
 - 通过代码分析上下文，找到不符合预期的问题点
 - 通过加 log 获得更多的执行过程信息，log 可使用代码中常用的 log 方式，良好的日志输出可帮助理解执行流程和诊断问题
 - 通过 [dlv](https://github.com/go-delve/delve) 调试 golang 代码
+
+一些注意事项：
+```
+1、尽量使用提供的辅助函数获取类的成员
+2、一些问题的细节或许可以参考参考 [TiDB](https://github.com/pingcap/tidb) 或者 [TiKV](https://github.com/tikv/tikv) 的源码
+```
 
 部分问题也可通过 classroom 同学相互讨论或者与讲师讨论尝试解决。
