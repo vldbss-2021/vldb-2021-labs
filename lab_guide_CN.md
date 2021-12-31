@@ -43,7 +43,7 @@ go version go1.16.4 linux/amd64
 
 ### 加入 Github Classrom
 
-参考 [classroom doc](./docs/classroom.md) 进入 github classroom 之后，将会自动生成 `vldb-2021-labs-beta` 对应个人 private repo，尝试将该 repo clone 到本地
+参考 [classroom doc](./docs/classroom.md) 进入 github classroom 之后，将会自动生成 `vldb-2021-labs` 对应个人 private repo，尝试将该 repo clone 到本地
 ```
 git clone https://github.com/vldbss-2021/vldb-labs-yourid.git .
 ```
