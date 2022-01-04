@@ -11,6 +11,7 @@ import (
 	"github.com/pingcap-incubator/tinykv/kv/util/engine_util"
 	"github.com/pingcap-incubator/tinykv/proto/pkg/metapb"
 	"github.com/pingcap-incubator/tinykv/proto/pkg/raft_cmdpb"
+	"github.com/pingcap/log"
 )
 
 func SleepMS(ms int64) {
@@ -99,7 +100,7 @@ func MustGetCf(engine *engine_util.Engines, cf string, key []byte, value []byte)
 		}
 		SleepMS(20)
 	}
-	panic(fmt.Sprintf("can't get value %s for key %s", hex.EncodeToString(value), hex.EncodeToString(key)))
+	log.Fatal(fmt.Sprintf("can't get value %s for key %s", hex.EncodeToString(value), hex.EncodeToString(key)))
 }
 
 func MustGetCfEqual(engine *engine_util.Engines, cf string, key []byte, value []byte) {
@@ -120,7 +121,7 @@ func MustGetCfNone(engine *engine_util.Engines, cf string, key []byte) {
 		}
 		SleepMS(20)
 	}
-	panic(fmt.Sprintf("get value %s for key %s", hex.EncodeToString(val), hex.EncodeToString(key)))
+	log.Fatal(fmt.Sprintf("get value %s for key %s", hex.EncodeToString(val), hex.EncodeToString(key)))
 }
 
 func MustGetNone(engine *engine_util.Engines, key []byte) {
