@@ -183,7 +183,6 @@ func GenericTest(t *testing.T, part string, nclients int, unreliable bool, crash
 	for i := 0; i < nclients; i++ {
 		clnts[i] = make(chan int, 1)
 	}
-
 	for i := 0; i < 3; i++ {
 		// log.Printf("Iteration %v\n", i)
 		atomic.StoreInt32(&done_clients, 0)
@@ -195,7 +194,7 @@ func GenericTest(t *testing.T, part string, nclients int, unreliable bool, crash
 				clnts[cli] <- j
 			}()
 			last := ""
-			for atomic.LoadInt32(&done_clients) == 0 || (split && atomic.LoadUint64(&writeCnt) < uint64(cfg.RegionMaxSize)) {
+			for atomic.LoadInt32(&done_clients) == 0 || (split && atomic.LoadUint64(&writeCnt) < cfg.RegionMaxSize) {
 				if (rand.Int() % 1000) < 500 {
 					key := strconv.Itoa(cli) + " " + fmt.Sprintf("%08d", j)
 					value := "x " + strconv.Itoa(cli) + " " + strconv.Itoa(j) + " y"

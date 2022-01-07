@@ -453,7 +453,7 @@ func (c *Cluster) MustTransferLeader(regionID uint64, leader *metapb.Peer) {
 			currentLeader.StoreId == leader.StoreId {
 			return
 		}
-		if time.Now().Sub(timer) > TIMEOUT {
+		if time.Since(timer) > TIMEOUT {
 			log.Fatal(fmt.Sprintf("failed to transfer leader to [%d] %s", regionID, leader.String()))
 		}
 		c.TransferLeader(regionID, leader)
