@@ -72,7 +72,7 @@ The `Write` interface will be used by the transaction engine to persist the writ
 
 To make it simple, we will skip the raft log consensus step and just consider a single machine storage engine first. After this we will get familiar with the storage engine interfaces, that's very useful as the `raftStore` will use the same storage engine to persist logs too.
 
-#### Implement The Core Interfaces of `StandAlongStorage`
+#### Implement The Core Interfaces of `StandAloneStorage`
 
 Try to implement the missing code in `kv/storage/standalone_storage/standalone_storage.go`, these code parts are marked with:
 
@@ -89,7 +89,7 @@ the storage engine should be encoded using `KeyWithCF` function considering its 
 
 #### Implement The Core Interfaces of `RaftStorage`
 
-In the `StandAlongStorage` the log engine layer is ignored, and all the read and write requests are directly processed by the storage engine. In this chapter we'll try to build the log engine as described above. In `standalone_storage` a single badger instance is used as the storage engine.
+In the `StandAloneStorage` the log engine layer is ignored, and all the read and write requests are directly processed by the storage engine. In this chapter we'll try to build the log engine as described above. In `standalone_storage` a single badger instance is used as the storage engine.
 There will be two `badger` instances in `raftStore`, the first one is used as the storage engine or state machine just like the `standalone_storage`, the second one will be used by the log engine in `raftStore` to persist raft logs. In `kv/util/engine_util/engines.go` you could find `Kv` and `Raft` struct members, the `Kv` instance is used as the storage engine and the `Raft` is used by the raft log engine.
 
 The workflow of the `raftStore` is:
