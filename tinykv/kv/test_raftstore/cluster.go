@@ -22,6 +22,8 @@ import (
 	"go.uber.org/zap"
 )
 
+const TIMEOUT = 10 * time.Second
+
 type Simulator interface {
 	RunStore(raftConf *config.Config, engine *engine_util.Engines, ctx context.Context) error
 	StopStore(storeID uint64)
@@ -316,7 +318,7 @@ func (c *Cluster) MustPut(key, value []byte) {
 
 func (c *Cluster) MustPutCF(cf string, key, value []byte) error {
 	req := NewPutCfCmd(cf, key, value)
-	resp, _, err := c.Request(key, []*raft_cmdpb.Request{req}, 5*time.Second)
+	resp, _, err := c.Request(key, []*raft_cmdpb.Request{req}, TIMEOUT)
 	if err != nil {
 		log.Fatal(fmt.Sprintf("request failed err=%v", err))
 		return err
@@ -352,7 +354,7 @@ func (c *Cluster) Get(key []byte) ([]byte, error) {
 
 func (c *Cluster) GetCF(cf string, key []byte) ([]byte, error) {
 	req := NewGetCfCmd(cf, key)
-	resp, _, err := c.Request(key, []*raft_cmdpb.Request{req}, 5*time.Second)
+	resp, _, err := c.Request(key, []*raft_cmdpb.Request{req}, TIMEOUT)
 	if resp.Header.Error != nil {
 		return nil, err
 	}
@@ -371,7 +373,7 @@ func (c *Cluster) MustDelete(key []byte) {
 
 func (c *Cluster) MustDeleteCF(cf string, key []byte) {
 	req := NewDeleteCfCmd(cf, key)
-	resp, _, err := c.Request(key, []*raft_cmdpb.Request{req}, 5*time.Second)
+	resp, _, err := c.Request(key, []*raft_cmdpb.Request{req}, TIMEOUT)
 	if err != nil {
 		log.Fatal(fmt.Sprintf("request failed err=%v", err))
 	}
@@ -391,7 +393,7 @@ func (c *Cluster) Scan(start, end []byte) ([][]byte, error) {
 	values := make([][]byte, 0)
 	key := start
 	for (len(end) != 0 && bytes.Compare(key, end) < 0) || (len(key) == 0 && len(end) == 0) {
-		resp, txn, err := c.Request(key, []*raft_cmdpb.Request{req}, 5*time.Second)
+		resp, txn, err := c.Request(key, []*raft_cmdpb.Request{req}, TIMEOUT)
 		if err != nil {
 			return nil, err
 		}
@@ -434,7 +436,7 @@ func (c *Cluster) TransferLeader(regionID uint64, leader *metapb.Peer) {
 	}
 	epoch := region.RegionEpoch
 	transferLeader := NewAdminRequest(regionID, epoch, NewTransferLeaderCmd(leader))
-	resp, _, err := c.CallCommandOnLeader(transferLeader, 5*time.Second)
+	resp, _, err := c.CallCommandOnLeader(transferLeader, TIMEOUT)
 	if err != nil {
 		log.Fatal(fmt.Sprintf("trasfer leader call has failed err=%v", err))
 	}
@@ -451,7 +453,7 @@ func (c *Cluster) MustTransferLeader(regionID uint64, leader *metapb.Peer) {
 			currentLeader.StoreId == leader.StoreId {
 			return
 		}
-		if time.Now().Sub(timer) > 5*time.Second {
+		if time.Since(timer) > TIMEOUT {
 			log.Fatal(fmt.Sprintf("failed to transfer leader to [%d] %s", regionID, leader.String()))
 		}
 		c.TransferLeader(regionID, leader)
