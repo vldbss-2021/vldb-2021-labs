@@ -183,17 +183,19 @@ func GenericTest(t *testing.T, part string, nclients int, unreliable bool, crash
 	for i := 0; i < nclients; i++ {
 		clnts[i] = make(chan int, 1)
 	}
+
 	for i := 0; i < 3; i++ {
 		// log.Printf("Iteration %v\n", i)
 		atomic.StoreInt32(&done_clients, 0)
 		atomic.StoreInt32(&done_partitioner, 0)
+		writeCnt := uint64(0)
 		go SpawnClientsAndWait(t, ch_clients, nclients, func(cli int, t *testing.T) {
 			j := 0
 			defer func() {
 				clnts[cli] <- j
 			}()
 			last := ""
-			for atomic.LoadInt32(&done_clients) == 0 {
+			for atomic.LoadInt32(&done_clients) == 0 || (split && atomic.LoadUint64(&writeCnt) < uint64(cfg.RegionMaxSize)) {
 				if (rand.Int() % 1000) < 500 {
 					key := strconv.Itoa(cli) + " " + fmt.Sprintf("%08d", j)
 					value := "x " + strconv.Itoa(cli) + " " + strconv.Itoa(j) + " y"
@@ -201,6 +203,7 @@ func GenericTest(t *testing.T, part string, nclients int, unreliable bool, crash
 					cluster.MustPut([]byte(key), []byte(value))
 					last = NextValue(last, value)
 					j++
+					atomic.AddUint64(&writeCnt, 1)
 				} else {
 					start := strconv.Itoa(cli) + " " + fmt.Sprintf("%08d", 0)
 					end := strconv.Itoa(cli) + " " + fmt.Sprintf("%08d", j)
