@@ -49,7 +49,7 @@ To build a complete distributed transaction database, we are going to add SQL su
 ## LAB1
 
 In this lab, we are going to get familiar with the whole framework in `tinykv`, and complete the implementation of the `raftStore` and `storeEngine`. As described above, the `raftStore` will process all the commit logs and replicate them to different nodes within different raft groups. In tinykv, a raft group is named `Region`, every region has its key ranges it will serve. There will be one region after the bootstrap stage, and the region could be split into more regions in the future, then different raft groups or what we call `regions` in the `raftStore` will be responsible for different key ranges, and `multi-raft` or `multiple-regions` will process client requests independently. By now you could simply regard that there is only one raft group or one region processing requests.
-This [docuemnt](https://docs.pingcap.com/zh/tidb/stable/tikv-overview) could be helpful to understand the `raftStore` architecture.
+This [document](https://docs.pingcap.com/zh/tidb/stable/tikv-overview) could be helpful to understand the `raftStore` architecture.
 
 
 ### The Code
