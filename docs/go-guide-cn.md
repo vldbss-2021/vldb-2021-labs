@@ -441,3 +441,7 @@ func main() {
 ### GOGC
 
 ### GOPROXY
+
+## 参考资料
+
+[Go for C programmers](https://talks.golang.org/2012/goforc.slide)
