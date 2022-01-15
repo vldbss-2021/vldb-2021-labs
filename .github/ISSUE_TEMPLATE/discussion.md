@@ -7,9 +7,11 @@ assignees: ''
 
 ---
 
+<!-- Provide the listed information as you can.  -->
+
 # Describe the problem you meet
 
-# Reproduce <!-- if it's not reproducable -->
+# Reproduce
 
 # Environment
 
