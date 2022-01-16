@@ -29,4 +29,4 @@ assignees: ''
 
 ## Go version
 
-<!-- run go version -->
+<!-- run `go version` -->
