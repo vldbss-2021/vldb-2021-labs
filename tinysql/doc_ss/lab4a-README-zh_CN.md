@@ -28,15 +28,3 @@
     - 5.3 `executor/simple.go`，`SimpleExec.executeRollback` 也会将 `mysql.ServerStatusInTrans` 设置为 `false`，但是会在 `executeRollback` 函数内部就对事物进行 Rollback。和 5.1 一样，会通过 `session.Txn` 函数来获取当前事务，但是不会等待事务激活（注意输入的参数）。如果获取到了事务，则会调用这个事务的 `Rollback` 方法进行清理。
 
 以上是 SQL 执行的关键链路，但是这个调用链路中的每一步都有关键函数被移除了，你需要根据调用链路的描述进行填充。
-
-## 测试
-
-运行 `make lab4a`，通过所有测试用例。
-
-可以使用下面的命令测试指定的单个或多个用例。
-
-```sh
-go test {package path} -check.f ^{regex}$
-# example
-go test -timeout 5s ./store/tikv -check.f ^TestFailAfterPrimary$
-```
