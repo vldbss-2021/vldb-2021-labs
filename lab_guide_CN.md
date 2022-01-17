@@ -45,10 +45,18 @@ go version go1.16.4 linux/amd64
 
 参考 [classroom doc](./docs/classroom.md) 进入 github classroom 之后，将会自动生成 `vldb-2021-labs` 对应个人 private repo，尝试将该 repo clone 到本地
 ```
-git clone https://github.com/vldbss-2021/vldb-labs-yourid.git .
+git clone git@github.com/vldbss-2021/vldb-labs-yourid.git .
 ```
-即可进行本地开发调试，测试过程可参考每个 lab 具体说明文档进行。在该 private repo 提交修改到 master 分支之后，github classroom 也将自动执行评分任务。推荐本地测试通过之后再提交 master 分支
-修改进行后台评分。
+
+即可进行本地开发调试，测试过程可参考每个 lab 具体说明文档进行。在该 private repo 提交修改到 master 分支之后，github classroom 也将自动执行评分任务。推荐本地测试通过之后再提交 master 分支修改进行后台评分。
+
+我们采用了 GitHub Actions 来自动化测试和评分，在第一次向 GitHub 提交代码前，需要执行：
+
+```sh
+cp scripts/classroom.yml .github/workflows/classroom.yml
+```
+
+来覆盖 classroom 默认生成的 `classroom.yml` 文件。
 
 参考每个 lab 具体文档（lab1, lab2, lab3, lab4）分别进行即可，其中 lab1 和 lab2 在 `tinykv` repo 中进行，有前后依赖关系。lab3 和 lab4 在 `tinysql` repo 中进行，有前后依赖关系。
 
@@ -73,6 +81,14 @@ ulimit -n 8192
 export GOGC=1; make lab1P1b
 export GOGC=1; go test -v --count=1 --parallel=1 -p=1 ./kv/test_raftstore -run TestBasic2BLab1P1a
 ```
+
+### 上传 GitHub 自动评分
+
+完成实验后，可以将本地代码上传到 GitHub，并触发 GitHub Actions 自动评分。
+
+查看 GitHub Actions 运行日志中 `Run you06/autograding@go` 这一步骤的输出即可检查通过了哪些测试。
+
+注意做完全部 4 个 lab 之后才会得到全部的分数并显示通过。
 
 ### 问题排查方法
 
