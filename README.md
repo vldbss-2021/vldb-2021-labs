@@ -36,6 +36,8 @@ Autograding is a workflow which can automatically run test cases. However there 
 cp scripts/classroom.yml .github/workflows/classroom.yml
 ```
 
+If you don't use [GitHub classroom](https://classroom.github.com/), just fork this repo, work in your repo, test locally and send a [email](mailto:vldbss.2021@pingcap.com) with your repository address to us after complete some or all the tasks.
+
 ### Getting started
 
 First, please clone the repository with git to get the source code of the project.
