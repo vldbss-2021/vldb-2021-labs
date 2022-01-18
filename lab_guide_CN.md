@@ -39,6 +39,12 @@ go version go1.16.4 linux/amd64
 验证方法：
 参考 [tutorial](https://go.dev/doc/tutorial/getting-started)  练习使用 go mod 进行开发，管理外部依赖。
 
+如果您的网络环境难以下载实验所需的依赖，推荐使用 GOPROXY 代理所有的依赖包下载。
+
+```
+export GOPROXY=https://goproxy.io,direct
+```
+
 ## 实验过程
 
 ### 加入 Github Classrom
