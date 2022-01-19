@@ -105,7 +105,8 @@ The above concepts or abstractions are about the raft instance. The following co
 - `Peer`. A peer is a member of a raft group or a region, by default 3 replicas are used and a region will have 3 different peers. A peer will have a `RawNode` inside which contains a raft instance.
 - `raftWorker`. The worker to process all the client requests routed to different region leaders or leader peers.
 - `peerMsgHandler`. The delegate used to process the client requests for a specific leader peer.
-- `applyWorker`. After the proposed requests and the related logs are committed, correspond apply requests will be routed to the applyWorker, then these logs will be applied to the state machine which is the `badger` storage engine in tinykv.
+- `applyWorker`. After the proposed requests and the related logs are committed, correspond apply requests will be routed to the `applyWorker`, then these logs will be applied to the state machine which is the `badger` storage engine in tinykv.
+
 
 Putting them together, the message flows could be split into two phases:
 
