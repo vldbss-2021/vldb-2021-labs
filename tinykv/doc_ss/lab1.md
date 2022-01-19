@@ -2,7 +2,7 @@
 
 ## The Design
 
-In this chapter, we'll discuss about the design of our distributed transactional database system. The overview of the architecture is:
+In this chapter, we'll discuss the design of our distributed transactional database system. The overview of the architecture is:
 
 ![overview](imgs/overview.png)
 
@@ -15,7 +15,7 @@ In the distributed environment, to meet the **availability** and **reliability**
 In a single machine database like MySQL, it's achieved by persisting InnoDB redo logs to the disk before return results to the client, obviously the logs could be lost if the single node fails. To persist the logs more reliably, replicas are needed so the distributed system
 is introduced. The difficult thing is how to make sure the logs are exactly the same in different replicas. Often we will use some consensus algorithms to replicate logs to different nodes, the `CAP` theory tells us the availability will increase and the possibility of losing logs becomes lower if more replicas are used. 
 
-In the architecture of `tinykv`, `Raft` is used as the concensus algorithem to replicate logs to replica nodes, and the code module is called `raftStore`. 
+In the architecture of `tinykv`, `Raft` is used as the consensus algorithm to replicate logs to replica nodes, and the code module is called `raftStore`. 
 
 ![raft](imgs/raft.png)
 
@@ -33,14 +33,14 @@ distributed transaction architectures, a special protocol such as `two-phase com
 
 In `tinykv` the `raftStore` has ensured logs will be replicated to replicas, and the failover is much easier that transaction states could always be restored if majority nodes of the raft group survive. That is to say the 2PC processing could continue as the newly elected leaders will always have same transaction states, no matter the coordinator or the participant fails.
 
-In tinysql/tinykv, the [percolator](https://research.google/pubs/pub36726/) protocol is used as the distributed transaction protocol, it's like the traditional 2PC way but still have some differences. One of the main diffences is that the coordinator or the scheduler does not need to persist the transaction states locally, all the transaction states are persisted in the participant nodes. In tinysql/tinykv cluster, the `tinysql` nodes work as the transaction coordinators and all the `tinykv` nodes are participants.In the next labs, we'll going to implement the percolator protocol based on the existing framework of `tinysql` and `tinykv`.
+In tinysql/tinykv, the [percolator](https://research.google/pubs/pub36726/) protocol is used as the distributed transaction protocol, it's like the traditional 2PC way but still have some differences. One of the main differences is that the coordinator or the scheduler does not need to persist the transaction states locally, all the transaction states are persisted in the participant nodes. In tinysql/tinykv cluster, the `tinysql` nodes work as the transaction coordinators and all the `tinykv` nodes are participants.In the next labs, we'll go to implement the percolator protocol based on the existing framework of `tinysql` and `tinykv`.
 
 ### Concurrency And Isolation
 
 To get better performance, a transaction engine will need to process many concurrent requests, how to process them concurrently and ensure the results are reasonable? Isolation levels are defined to describe the tradeoff between performance and concurrency constraints, if you are not familiar with the transaction isolation levels and related concepts, the [document](https://pingcap.com/blog-cn/take-you-through-the-isolation-level-of-tidb-1) could be referred.
 
 In tinysql/tinykv cluster, we're going to implement a strong isolation constraint which is called `snapshot isolation` or `repeatable read`. In the distributed environment,
-a global timestamp ordering allocator is used to sequence all the concurrent transactions, and each transaction will has a unique `start_ts` which means the snapshot it uses, this timestamp ordering allocator is in `tinyscheudler` server in the tinysql/tinykv cluster. To learn more about the scheduler service of the cluster, this [document](https://pingcap.com/blog-cn/placement-driver) could be helpful.
+a global timestamp ordering allocator is used to sequence all the concurrent transactions, and each transaction will have a unique `start_ts` which means the snapshot it uses, this timestamp ordering allocator is in `tinyscheudler` server in the tinysql/tinykv cluster. To learn more about the scheduler service of the cluster, this [document](https://pingcap.com/blog-cn/placement-driver) could be helpful.
 
 ### Support SQL Transaction
 
@@ -56,7 +56,7 @@ This [document](https://docs.pingcap.com/zh/tidb/stable/tikv-overview) could be 
 
 #### The `raftStore` abstraction
 
-In `kv/storage/storage.go`, there is the interfaces or abstractions of the `raftStore`.
+In `kv/storage/storage.go`, there is the interface or abstractions of the `raftStore`.
 ```
 // Storage represents the internal-facing server part of TinyKV, it handles sending and receiving from other
 // TinyKV nodes. As part of that responsibility, it also reads and writes data to disk (or semi-permanent memory).
@@ -80,7 +80,7 @@ Try to implement the missing code in `kv/storage/standalone_storage/standalone_s
 
 After finishing these parts, run `make lab1P0` command to check if all the test cases are passed. Things to note:
 - As the [badger](https://github.com/dgraph-io/badger) is used as the storage engine, the common usages could be found in its documents and repository.
-- The `badger` storage engine does not support [`column family`](https://en.wikipedia.org/wiki/Standard_column_family). The column families are needed for the `percolator` transaction model, in `tinykv` the column family related utilites are already wrapped in `kv/util/engine_util/util.go`. When process the `storage.Modify`, the key written into
+- The `badger` storage engine does not support [`column family`](https://en.wikipedia.org/wiki/Standard_column_family). The column families are needed for the `percolator` transaction model, in `tinykv` the column family related utilities are already wrapped in `kv/util/engine_util/util.go`. When process the `storage.Modify`, the key written into
 the storage engine should be encoded using `KeyWithCF` function considering its expected column family. In `tinykv` there are two types of `Modify`, check the `kv/storage/modify.go` for more information.
 - The `scheduler_client.Client` will not be used by the`standAloneServer`, so it could be skipped.
 - The `txn` features and related read/write interfaces provided by `badger` could be considered. Check about the `BadgerReader` for more information.
@@ -105,7 +105,8 @@ The above concepts or abstractions are about the raft instance. The following co
 - `Peer`. A peer is a member of a raft group or a region, by default 3 replicas are used and a region will have 3 different peers. A peer will have a `RawNode` inside which contains a raft instance.
 - `raftWorker`. The worker to process all the client requests routed to different region leaders or leader peers.
 - `peerMsgHandler`. The delegate used to process the client requests for a specific leader peer.
-- `applyWorker`. After the proposed requests and the related logs are committed, correspond apply requests will be routed to the apply worker, then these logs will be applied to the state machine which is the `badger` storage engine in tinykv.
+- `applyWorker`. After the proposed requests and the related logs are committed, correspond apply requests will be routed to the `applyWorker`, then these logs will be applied to the state machine which is the `badger` storage engine in tinykv.
+
 
 Putting them together, the message flows could be split into two phases:
 
@@ -121,7 +122,7 @@ Try to implement the missing code in:
 - `kv/raftstore/peer_msg_handler.go`, the `proposeRaftCommand` method, which is the core part of read/write requests proposing.
 - `kv/raftstore/peer.go`, the `HandleRaftReady` method, which is the core part of raft ready processing.
 - `kv/raftstore/peer_storage.go`, the `SaveReadyState` method, which is core part of the states and logs persistency.
-- `kv/raftstore/peer_storage.go`, the `Append` method, it append the logs from raft ready to the log engine.
+- `kv/raftstore/peer_storage.go`, the `Append` method, it appends the logs from raft ready to the log engine.
 
 
 These code part entrances are marked with:
@@ -146,8 +147,8 @@ As the `raftStore` is quite complex so the tests are split into 4 parts, there i
 - `make lab1P4b` with fault injections. This is about the configuration change tests of `raftStore`.
 
 Things to note:
-- When the tests has failed, there will be some trash directory or files in `/tmp/test-raftstore-xxx`, they could be removed by hand, or the `make clean` command could be used to do the cleanup work.
-- The tests may consume much memory, better to use a development machine with RAM(>= 16GB), if the tests could not run together because of OOM, try to run them one by one using commands like `go test -v ./kv/test_raftstore -run test_name`.
+- When the tests failed, there will be some trash directory or files in `/tmp/test-raftstore-xxx`, they could be removed by hand, or the `make clean` command could be used to do the cleanup work.
+- The tests may consume much memory, better to use a development machine with RAM(>= 16 GB), if the tests could not run together because of OOM, try to run them one by one using commands like `go test -v ./kv/test_raftstore -run test_name`.
 - Try to set bigger open file limits before running the tests, for example `ulimit -n 8192`.
 - The raft package provides the raft implementation. It's wrapped into `RawNode` and the `Step` and `Ready` are the core interfaces to use the `RawNode`.
 - There will be different kinds of workers in the `RaftStorage`, the most important worker is the `raftWorker` and `applyWorker`.
