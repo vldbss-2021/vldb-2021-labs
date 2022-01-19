@@ -4,7 +4,7 @@
 
 在这一章节，我们将实现从客户端输入 SQL 到数据写入分布式的 KV 数据库中的全链路。
 
-详细地资料可以参考文章 [TiDB 源码阅读系列文章（三）SQL 的一生](https://pingcap.com/blog-cn/tidb-source-code-reading-3)，此处仅做简要说明。
+详细的资料可以参考文章 [TiDB 源码阅读系列文章（三）SQL 的一生](https://pingcap.com/blog-cn/tidb-source-code-reading-3)，此处仅做简要说明。
 
 ## 通用调用链路
 
