@@ -92,36 +92,4 @@ mkdir -p data
 
 ### Deploy Use Cluster Command
 
-Deploy the cluster in the local environment
-```
-# compile the cluster binary
-cd tinykv
-make deploy-cluster
-
-# deploy the cluster, by default the number of scheduler server is 1 and the number of kv server is 3.
-./bin/cluster deploy
-
-# start the deployed cluster
-./bin/cluster start
-
-# stop the deployed cluster
-./bin/cluster stop
-
-# update the binary, please stop the cluster then do the upgrade
-./bin/cluster upgrade
-
-# unsafe destroy the whole cluster
-./bin/cluster destroy
-
-```
-
-Note this does not deploy a `tinysql` server, to deploy a `tinysql` server, use
-```
-./tinysql-server --store=tikv --path="127.0.0.1:2379"
-```
-
-### Play
-
-```
-mysql -u root -h 127.0.0.1 -P 4000
-```
+See [TinyUp](https://github.com/vldbss-2021/tinyup).
