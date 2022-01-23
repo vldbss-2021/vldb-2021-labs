@@ -597,7 +597,7 @@ func (cc *clientConn) Run(ctx context.Context) {
 			return
 		}
 
-		// Hint: step I.1
+		// Hint: step I.2
 		// YOUR CODE HERE (lab4)
 		panic("YOUR CODE HERE")
 		if err != nil {
