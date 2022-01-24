@@ -116,7 +116,7 @@ After finish these two parts, run `make lab2P1` to check if all the tests are pa
 
 #### Implement the `Rollback` and `CheckTxnStatus` Commands
 
-`Rollback` is used unlock the key and put the `Rollback Record` for a key. `CheckTxnStatus` is used to query the primary key lock status for a specific transaction. try to implement the missing code in `kv/transaction/commands/rollback.go` and `kv/transaction/commands/checkTxn.go`, These code parts are marked with:
+`Rollback` is used to unlock the key and put the `Rollback Record` for a key. `CheckTxnStatus` is used to query the primary key lock status for a specific transaction. try to implement the missing code in `kv/transaction/commands/rollback.go` and `kv/transaction/commands/checkTxn.go`, These code parts are marked with:
 
 ```
 // YOUR CODE HERE (lab2).
