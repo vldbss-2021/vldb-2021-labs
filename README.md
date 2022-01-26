@@ -57,7 +57,7 @@ Rather than a course, you can try TinyKV by deploying a real cluster, and intera
 
 ```
 cd tinykv
-make default
+make kv scheduler
 ```
 
 It builds the binary of `tinykv-server` and `tinyscheduler-server` to `bin` dir.
