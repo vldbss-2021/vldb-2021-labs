@@ -57,7 +57,7 @@ Rather than a course, you can try TinyKV by deploying a real cluster, and intera
 
 ```
 cd tinykv
-make kv
+make default
 ```
 
 It builds the binary of `tinykv-server` and `tinyscheduler-server` to `bin` dir.
@@ -66,6 +66,7 @@ It builds the binary of `tinykv-server` and `tinyscheduler-server` to `bin` dir.
 cd tinysql
 make server
 ```
+
 It buillds the binary of `tinysql-server` to `bin` dir.
 
 
